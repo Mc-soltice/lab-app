@@ -1,0 +1,377 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ============================
+// ENUMS
+// ============================
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  SHARE
+}
+
+enum UserRole {
+  BLOGGER
+  ADMIN
+}
+
+// ============================
+// USER
+// ============================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  googleId      String?   @unique @map("google_id")
+  emailVerified DateTime? @map("email_verified")
+  username      String    @unique
+  password      String
+  firstName     String?   @map("first_name")
+  lastName      String?   @map("last_name")
+  bio           String?   @db.Text
+  avatar        String?
+  role          UserRole  @default(BLOGGER)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  posts         Post[]
+  podcasts      Podcast[]
+  books         Book[]
+  comments      Comment[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  followers     Follow[]       @relation("following")
+  following     Follow[]       @relation("followers")
+  notifications Notification[]
+
+  @@map("users")
+}
+
+// ============================
+// TAXONOMIE
+// ============================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  posts    Post[]
+  podcasts Podcast[]
+  books    Book[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  posts    PostTag[]
+  podcasts PodcastTag[]
+  books    BookTag[]
+
+  @@map("tags")
+}
+
+// ============================
+// POST
+// ============================
+
+model Post {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  content        String     @db.Text
+  excerpt        String?    @db.Text
+  coverImage     String?    @map("cover_image")
+  publishedAt    DateTime?  @map("published_at")
+  status         PostStatus @default(DRAFT)
+  views          Int        @default(0)
+  likesCount     Int        @default(0) @map("likes_count")
+  commentsCount  Int        @default(0) @map("comments_count")
+  bookmarksCount Int        @default(0) @map("bookmarks_count")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  comments  Comment[]
+  likes     Like[]
+  bookmarks Bookmark[]
+  tags      PostTag[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("posts")
+}
+
+model PostTag {
+  postId String @map("post_id")
+  tagId  String @map("tag_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+// ============================
+// PODCAST
+// ============================
+
+model Podcast {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  description    String?    @db.Text
+  audioUrl       String     @map("audio_url")
+  coverImage     String?    @map("cover_image")
+  duration       Int
+  transcript     String?    @db.Text
+  publishedAt    DateTime?  @map("published_at")
+  status         PostStatus @default(DRAFT)
+  plays          Int        @default(0)
+  likesCount     Int        @default(0) @map("likes_count")
+  commentsCount  Int        @default(0) @map("comments_count")
+  bookmarksCount Int        @default(0) @map("bookmarks_count")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  tags      PodcastTag[]
+  likes     Like[]
+  comments  Comment[]
+  bookmarks Bookmark[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("podcasts")
+}
+
+model PodcastTag {
+  podcastId String  @map("podcast_id")
+  tagId     String  @map("tag_id")
+  podcast   Podcast @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([podcastId, tagId])
+  @@map("podcast_tags")
+}
+
+// ============================
+// BOOK
+// ============================
+
+model Book {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  synopsis       String?    @db.Text
+  price          Decimal?   @db.Decimal(10, 2)
+  coverImage     String?    @map("cover_image")
+  fileUrl        String?    @map("file_url")
+  status         PostStatus @default(DRAFT)
+  downloadCount  Int        @default(0) @map("download_count")
+  likesCount     Int        @default(0) @map("likes_count")
+  commentsCount  Int        @default(0) @map("comments_count")
+  bookmarksCount Int        @default(0) @map("bookmarks_count")
+  publishedAt    DateTime?  @map("published_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  tags      BookTag[]
+  likes     Like[]
+  comments  Comment[]
+  bookmarks Bookmark[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@map("books")
+}
+
+model BookTag {
+  bookId String @map("book_id")
+  tagId  String @map("tag_id")
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, tagId])
+  @@map("book_tags")
+}
+
+// ============================
+// COMMENT (polymorphe : post | podcast | book)
+// ============================
+
+model Comment {
+  id           String   @id @default(cuid())
+  content      String   @db.Text
+  likesCount   Int      @default(0) @map("likes_count")
+  repliesCount Int      @default(0) @map("replies_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  postId    String?  @map("post_id")
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  podcastId String?  @map("podcast_id")
+  podcast   Podcast? @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  bookId    String?  @map("book_id")
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  parentId String?   @map("parent_id")
+  parent   Comment?  @relation("replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("replies")
+
+  likes Like[]
+
+  @@index([postId])
+  @@index([podcastId])
+  @@index([bookId])
+  @@index([parentId])
+  @@index([authorId])
+  @@map("comments")
+}
+
+// ============================
+// LIKE (polymorphe : post | podcast | book | comment)
+// ============================
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId    String?  @map("post_id")
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  podcastId String?  @map("podcast_id")
+  podcast   Podcast? @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  bookId    String?  @map("book_id")
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  commentId String?  @map("comment_id")
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@unique([userId, podcastId])
+  @@unique([userId, bookId])
+  @@unique([userId, commentId])
+  @@index([postId])
+  @@index([podcastId])
+  @@index([bookId])
+  @@index([commentId])
+  @@map("likes")
+}
+
+// ============================
+// BOOKMARK (polymorphe : post | podcast | book)
+// ============================
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId    String?  @map("post_id")
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  podcastId String?  @map("podcast_id")
+  podcast   Podcast? @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  bookId    String?  @map("book_id")
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@unique([userId, podcastId])
+  @@unique([userId, bookId])
+  @@map("bookmarks")
+}
+
+// ============================
+// FOLLOW
+// ============================
+
+model Follow {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  followerId String @map("follower_id")
+  follower   User   @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+
+  followingId String @map("following_id")
+  following   User   @relation("followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+// ============================
+// NOTIFICATION
+// ============================
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  message   String           @db.Text
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  actorId   String? @map("actor_id")
+  postId    String? @map("post_id")
+  podcastId String? @map("podcast_id")
+  bookId    String? @map("book_id")
+  commentId String? @map("comment_id")
+
+  @@index([userId])
+  @@index([read])
+  @@map("notifications")
+}

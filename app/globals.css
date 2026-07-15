@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --breakpoint-xs: 30rem;
+  --font-display: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+:root {
+  --bg-primary: #FAF8F5;      /* blanc chaud, cohérent avec text-primary */
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F3EFE9;     /* beige très pâle, dans la même famille chaude */
+
+  --text-primary: #2B2926;    /* gardé, c'est une bonne base chaude */
+  --text-secondary: #5C5650;  /* gardé */
+  --text-tertiary: #8C857C;   /* à utiliser uniquement sur bg-secondary (blanc) pour le contraste */
+
+  --border: #E5DFD6;          /* neutre chaud, discret */
+  --accent: #7A66E6;          /* violet conservé comme accent fort */
+  --accent-hover: #6353C9;    /* version plus foncée de l'accent, logique pour un hover */
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1C1B19;
+  --bg-secondary: #26241F;
+  --bg-tertiary: #332F28;
+  --text-primary: #EDEAE3;
+  --text-secondary: #B8B2A6;
+  --text-tertiary: #7D7669;
+  --border: #3A362E;
+  --accent: #C99B82;
+  --accent-hover: #DBB39C;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Styles supplémentaires pour le slider */
+.slider-container {
+  position: relative;
+  overflow: hidden;
+}
+.slider-track {
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+}
+.slider-slide {
+  flex: 0 0 100%;
+}
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.slider-btn:hover {
+  background: var(--bg-tertiary);
+}
+.slider-btn.prev {
+  left: 12px;
+}
+.slider-btn.next {
+  right: 12px;
+}
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  cursor: pointer;
+}
+.dot.active {
+  background: var(--accent);
+  width: 20px;
+  border-radius: 4px;
+}
+
+/* Styles supplémentaires pour le siderbar */
+
+/* Animation pour le drawer mobile */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
