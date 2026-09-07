@@ -28,4 +28,10 @@ export class UserRepository {
   async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     return this.db.user.update({ where: { id }, data });
   }
+  async findAll(): Promise<User[]> {
+    return this.db.user.findMany();
+  }
+  async delete(id: string): Promise<User> {
+    return this.db.user.delete({ where: { id } });
+  }
 }

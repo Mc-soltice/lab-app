@@ -49,6 +49,7 @@ export type BookMinAggregateOutputType = {
   synopsis: string | null
   price: runtime.Decimal | null
   coverImage: string | null
+  fileUrl: string | null
   status: $Enums.PostStatus | null
   downloadCount: number | null
   likesCount: number | null
@@ -68,6 +69,7 @@ export type BookMaxAggregateOutputType = {
   synopsis: string | null
   price: runtime.Decimal | null
   coverImage: string | null
+  fileUrl: string | null
   status: $Enums.PostStatus | null
   downloadCount: number | null
   likesCount: number | null
@@ -87,6 +89,7 @@ export type BookCountAggregateOutputType = {
   synopsis: number
   price: number
   coverImage: number
+  fileUrl: number
   status: number
   downloadCount: number
   likesCount: number
@@ -124,6 +127,7 @@ export type BookMinAggregateInputType = {
   synopsis?: true
   price?: true
   coverImage?: true
+  fileUrl?: true
   status?: true
   downloadCount?: true
   likesCount?: true
@@ -143,6 +147,7 @@ export type BookMaxAggregateInputType = {
   synopsis?: true
   price?: true
   coverImage?: true
+  fileUrl?: true
   status?: true
   downloadCount?: true
   likesCount?: true
@@ -162,6 +167,7 @@ export type BookCountAggregateInputType = {
   synopsis?: true
   price?: true
   coverImage?: true
+  fileUrl?: true
   status?: true
   downloadCount?: true
   likesCount?: true
@@ -268,6 +274,7 @@ export type BookGroupByOutputType = {
   synopsis: string | null
   price: runtime.Decimal | null
   coverImage: string | null
+  fileUrl: string | null
   status: $Enums.PostStatus
   downloadCount: number
   likesCount: number
@@ -310,6 +317,7 @@ export type BookWhereInput = {
   synopsis?: Prisma.StringNullableFilter<"Book"> | string | null
   price?: Prisma.DecimalNullableFilter<"Book"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.StringNullableFilter<"Book"> | string | null
+  fileUrl?: Prisma.StringNullableFilter<"Book"> | string | null
   status?: Prisma.EnumPostStatusFilter<"Book"> | $Enums.PostStatus
   downloadCount?: Prisma.IntFilter<"Book"> | number
   likesCount?: Prisma.IntFilter<"Book"> | number
@@ -335,6 +343,7 @@ export type BookOrderByWithRelationInput = {
   synopsis?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   downloadCount?: Prisma.SortOrder
   likesCount?: Prisma.SortOrder
@@ -364,6 +373,7 @@ export type BookWhereUniqueInput = Prisma.AtLeast<{
   synopsis?: Prisma.StringNullableFilter<"Book"> | string | null
   price?: Prisma.DecimalNullableFilter<"Book"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.StringNullableFilter<"Book"> | string | null
+  fileUrl?: Prisma.StringNullableFilter<"Book"> | string | null
   status?: Prisma.EnumPostStatusFilter<"Book"> | $Enums.PostStatus
   downloadCount?: Prisma.IntFilter<"Book"> | number
   likesCount?: Prisma.IntFilter<"Book"> | number
@@ -389,6 +399,7 @@ export type BookOrderByWithAggregationInput = {
   synopsis?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrderInput | Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   downloadCount?: Prisma.SortOrder
   likesCount?: Prisma.SortOrder
@@ -416,6 +427,7 @@ export type BookScalarWhereWithAggregatesInput = {
   synopsis?: Prisma.StringNullableWithAggregatesFilter<"Book"> | string | null
   price?: Prisma.DecimalNullableWithAggregatesFilter<"Book"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.StringNullableWithAggregatesFilter<"Book"> | string | null
+  fileUrl?: Prisma.StringNullableWithAggregatesFilter<"Book"> | string | null
   status?: Prisma.EnumPostStatusWithAggregatesFilter<"Book"> | $Enums.PostStatus
   downloadCount?: Prisma.IntWithAggregatesFilter<"Book"> | number
   likesCount?: Prisma.IntWithAggregatesFilter<"Book"> | number
@@ -435,6 +447,7 @@ export type BookCreateInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -458,6 +471,7 @@ export type BookUncheckedCreateInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -481,6 +495,7 @@ export type BookUpdateInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -504,6 +519,7 @@ export type BookUncheckedUpdateInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -527,6 +543,7 @@ export type BookCreateManyInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -546,6 +563,7 @@ export type BookUpdateManyMutationInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -563,6 +581,7 @@ export type BookUncheckedUpdateManyInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -598,6 +617,7 @@ export type BookCountOrderByAggregateInput = {
   synopsis?: Prisma.SortOrder
   price?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
+  fileUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   downloadCount?: Prisma.SortOrder
   likesCount?: Prisma.SortOrder
@@ -625,6 +645,7 @@ export type BookMaxOrderByAggregateInput = {
   synopsis?: Prisma.SortOrder
   price?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
+  fileUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   downloadCount?: Prisma.SortOrder
   likesCount?: Prisma.SortOrder
@@ -644,6 +665,7 @@ export type BookMinOrderByAggregateInput = {
   synopsis?: Prisma.SortOrder
   price?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
+  fileUrl?: Prisma.SortOrder
   status?: Prisma.SortOrder
   downloadCount?: Prisma.SortOrder
   likesCount?: Prisma.SortOrder
@@ -835,6 +857,7 @@ export type BookCreateWithoutAuthorInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -857,6 +880,7 @@ export type BookUncheckedCreateWithoutAuthorInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -908,6 +932,7 @@ export type BookScalarWhereInput = {
   synopsis?: Prisma.StringNullableFilter<"Book"> | string | null
   price?: Prisma.DecimalNullableFilter<"Book"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.StringNullableFilter<"Book"> | string | null
+  fileUrl?: Prisma.StringNullableFilter<"Book"> | string | null
   status?: Prisma.EnumPostStatusFilter<"Book"> | $Enums.PostStatus
   downloadCount?: Prisma.IntFilter<"Book"> | number
   likesCount?: Prisma.IntFilter<"Book"> | number
@@ -927,6 +952,7 @@ export type BookCreateWithoutCategoryInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -949,6 +975,7 @@ export type BookUncheckedCreateWithoutCategoryInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -997,6 +1024,7 @@ export type BookCreateWithoutTagsInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1019,6 +1047,7 @@ export type BookUncheckedCreateWithoutTagsInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1057,6 +1086,7 @@ export type BookUpdateWithoutTagsInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1079,6 +1109,7 @@ export type BookUncheckedUpdateWithoutTagsInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1101,6 +1132,7 @@ export type BookCreateWithoutCommentsInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1123,6 +1155,7 @@ export type BookUncheckedCreateWithoutCommentsInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1161,6 +1194,7 @@ export type BookUpdateWithoutCommentsInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1183,6 +1217,7 @@ export type BookUncheckedUpdateWithoutCommentsInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1205,6 +1240,7 @@ export type BookCreateWithoutLikesInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1227,6 +1263,7 @@ export type BookUncheckedCreateWithoutLikesInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1265,6 +1302,7 @@ export type BookUpdateWithoutLikesInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1287,6 +1325,7 @@ export type BookUncheckedUpdateWithoutLikesInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1309,6 +1348,7 @@ export type BookCreateWithoutBookmarksInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1331,6 +1371,7 @@ export type BookUncheckedCreateWithoutBookmarksInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1369,6 +1410,7 @@ export type BookUpdateWithoutBookmarksInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1391,6 +1433,7 @@ export type BookUncheckedUpdateWithoutBookmarksInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1413,6 +1456,7 @@ export type BookCreateManyAuthorInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1431,6 +1475,7 @@ export type BookUpdateWithoutAuthorInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1453,6 +1498,7 @@ export type BookUncheckedUpdateWithoutAuthorInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1475,6 +1521,7 @@ export type BookUncheckedUpdateManyWithoutAuthorInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1493,6 +1540,7 @@ export type BookCreateManyCategoryInput = {
   synopsis?: string | null
   price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: string | null
+  fileUrl?: string | null
   status?: $Enums.PostStatus
   downloadCount?: number
   likesCount?: number
@@ -1511,6 +1559,7 @@ export type BookUpdateWithoutCategoryInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1533,6 +1582,7 @@ export type BookUncheckedUpdateWithoutCategoryInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1555,6 +1605,7 @@ export type BookUncheckedUpdateManyWithoutCategoryInput = {
   synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
   likesCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1631,6 +1682,7 @@ export type BookSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   synopsis?: boolean
   price?: boolean
   coverImage?: boolean
+  fileUrl?: boolean
   status?: boolean
   downloadCount?: boolean
   likesCount?: boolean
@@ -1659,6 +1711,7 @@ export type BookSelectScalar = {
   synopsis?: boolean
   price?: boolean
   coverImage?: boolean
+  fileUrl?: boolean
   status?: boolean
   downloadCount?: boolean
   likesCount?: boolean
@@ -1671,7 +1724,7 @@ export type BookSelectScalar = {
   categoryId?: boolean
 }
 
-export type BookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "synopsis" | "price" | "coverImage" | "status" | "downloadCount" | "likesCount" | "commentsCount" | "bookmarksCount" | "publishedAt" | "createdAt" | "updatedAt" | "authorId" | "categoryId", ExtArgs["result"]["book"]>
+export type BookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "synopsis" | "price" | "coverImage" | "fileUrl" | "status" | "downloadCount" | "likesCount" | "commentsCount" | "bookmarksCount" | "publishedAt" | "createdAt" | "updatedAt" | "authorId" | "categoryId", ExtArgs["result"]["book"]>
 export type BookInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   category?: boolean | Prisma.Book$categoryArgs<ExtArgs>
@@ -1699,6 +1752,7 @@ export type $BookPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     synopsis: string | null
     price: runtime.Decimal | null
     coverImage: string | null
+    fileUrl: string | null
     status: $Enums.PostStatus
     downloadCount: number
     likesCount: number
@@ -2090,6 +2144,7 @@ export interface BookFieldRefs {
   readonly synopsis: Prisma.FieldRef<"Book", 'String'>
   readonly price: Prisma.FieldRef<"Book", 'Decimal'>
   readonly coverImage: Prisma.FieldRef<"Book", 'String'>
+  readonly fileUrl: Prisma.FieldRef<"Book", 'String'>
   readonly status: Prisma.FieldRef<"Book", 'PostStatus'>
   readonly downloadCount: Prisma.FieldRef<"Book", 'Int'>
   readonly likesCount: Prisma.FieldRef<"Book", 'Int'>

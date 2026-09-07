@@ -46,7 +46,7 @@ export const authOptions: AuthOptions = {
           firstName: user.firstName,
           lastName: user.lastName,
           avatar: user.avatar,
-          role: user.role as "ADMIN" | "BLOGGER",
+          role: user.role as "ADMIN" | "BLOGGER" | "GESTIONNAIRE",
         };
       },
     }),
@@ -115,7 +115,7 @@ export const authOptions: AuthOptions = {
 
           token.id = dbUser.id;
           token.username = dbUser.username;
-          token.role = dbUser.role as "ADMIN" | "BLOGGER";
+          token.role = dbUser.role as "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
           token.avatar = dbUser.avatar;
           token.firstName = dbUser.firstName;
           token.lastName = dbUser.lastName;
@@ -127,7 +127,7 @@ export const authOptions: AuthOptions = {
       if (user && !token.id) {
         token.id = user.id;
         token.username = user.username;
-        token.role = user.role as "ADMIN" | "BLOGGER";
+        token.role = user.role as "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
         token.avatar = user.avatar;
         token.firstName = user.firstName;
         token.lastName = user.lastName;

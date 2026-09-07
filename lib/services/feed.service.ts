@@ -2,8 +2,10 @@
 import { Post, User } from "@/prisma/generated/client";
 import { NotFoundException } from "../exceptions";
 import { prisma } from "../prisma/client";
-import { BookmarkRepository } from "../repositories/bookmark.repository";
-import { FollowRepository } from "../repositories/follow.repository";
+import {
+  BookmarkRepository,
+  BookmarkWithRelations,
+} from "../repositories/bookmark.repository";
 import { LikeRepository } from "../repositories/like.repository";
 import { PostRepository } from "../repositories/post.repository";
 import { UserRepository } from "../repositories/user.repository";
@@ -38,13 +40,10 @@ export interface FeedItem {
     avatar: string | null;
     bio: string | null;
     postsCount?: number;
-    followersCount?: number;
-    followingCount?: number;
   };
   interactionState?: {
     isLiked: boolean;
     isBookmarked: boolean;
-    isFollowing: boolean;
   };
   bookmarkId?: string;
 }
@@ -62,8 +61,6 @@ export interface FeedResponse {
 type AuthorWithStats = User & {
   _count: {
     posts: number;
-    followers: number;
-    following: number;
   };
 };
 
@@ -91,26 +88,14 @@ type PostWithRelations = Post & {
   }>;
 };
 
-// Type pour les bookmarks avec leurs relations
-type BookmarkWithPost = {
-  id: string;
-  createdAt: Date;
-  postId: string | null;
-  post: {
-    id: string;
-    title: string;
-    slug: string;
-    coverImage: string | null;
-    authorId: string;
-  } | null;
-};
+// Alias pour les bookmarks de type "post"
+type BookmarkWithPost = BookmarkWithRelations;
 
 export class FeedService {
   private postRepository = new PostRepository();
   private userRepository = new UserRepository();
   private likeRepository = new LikeRepository();
   private bookmarkRepository = new BookmarkRepository();
-  private followRepository = new FollowRepository();
 
   async getMainFeed(
     userId?: string,
@@ -139,46 +124,31 @@ export class FeedService {
       };
     }
 
-    // Récupérer les informations enrichies des auteurs
+    // Préparer les IDs des posts et auteurs pour les requêtes parallèles
     const authorIds = [...new Set(posts.map((post: Post) => post.authorId))];
-    const authors = await this.getAuthorsWithStats(authorIds);
-
-    // Préparer les IDs des posts pour les requêtes d'interactions
     const postIds = posts.map((post: Post) => post.id);
+
+    // Récupérer les informations enrichies des auteurs
+    const authors = await this.getAuthorsWithStats(authorIds);
 
     // Récupérer les interactions si un utilisateur est connecté
     let userLikes: Set<string> = new Set();
     let userBookmarks: Set<string> = new Set();
-    let userFollowing: Set<string> = new Set();
 
     if (userId) {
-      // Récupérer tous les likes de l'utilisateur pour ces posts
-      const likes = await this.likeRepository.findByUserAndPostIds(
-        userId,
-        postIds,
-      );
+      // Exécuter les 2 requêtes d'interactions EN PARALLÈLE
+      const [likes, bookmarks] = await Promise.all([
+        this.likeRepository.findByUserAndPostIds(userId, postIds),
+        this.bookmarkRepository.findByUserAndPostIds(userId, postIds),
+      ]);
+
       userLikes = new Set(
         likes.map((like) => like.postId!).filter(Boolean) as string[],
-      );
-
-      // Récupérer tous les bookmarks de l'utilisateur pour ces posts
-      const bookmarks = await this.bookmarkRepository.findByUserAndPostIds(
-        userId,
-        postIds,
       );
       userBookmarks = new Set(
         bookmarks
           .map((bookmark) => bookmark.postId!)
           .filter(Boolean) as string[],
-      );
-
-      // Récupérer tous les follows de l'utilisateur
-      const follows = await this.followRepository.findByFollowerAndAuthorIds(
-        userId,
-        authorIds,
-      );
-      userFollowing = new Set(
-        follows.map((follow) => follow.followingId).filter(Boolean) as string[],
       );
     }
 
@@ -202,14 +172,11 @@ export class FeedService {
           avatar: author.avatar,
           bio: author.bio,
           postsCount: author._count?.posts || 0,
-          followersCount: author._count?.followers || 0,
-          followingCount: author._count?.following || 0,
         },
         ...(userId && {
           interactionState: {
             isLiked: userLikes.has(post.id),
             isBookmarked: userBookmarks.has(post.id),
-            isFollowing: userFollowing.has(author.id),
           },
         }),
       };
@@ -259,37 +226,28 @@ export class FeedService {
       avatar: user.avatar,
       bio: user.bio,
       postsCount: authorWithStats._count?.posts || 0,
-      followersCount: authorWithStats._count?.followers || 0,
-      followingCount: authorWithStats._count?.following || 0,
     };
 
     // Préparer les IDs des posts et les interactions
     const postIds = posts.map((post: any) => post.id);
     let userLikes: Set<string> = new Set();
     let userBookmarks: Set<string> = new Set();
-    let isFollowing = false;
 
     if (userId) {
-      const likes = await this.likeRepository.findByUserAndPostIds(
-        userId,
-        postIds,
-      );
+      // Exécuter les 2 requêtes d'interactions EN PARALLÈLE
+      const [likes, bookmarks] = await Promise.all([
+        this.likeRepository.findByUserAndPostIds(userId, postIds),
+        this.bookmarkRepository.findByUserAndPostIds(userId, postIds),
+      ]);
+
       userLikes = new Set(
         likes.map((like) => like.postId!).filter(Boolean) as string[],
-      );
-
-      const bookmarks = await this.bookmarkRepository.findByUserAndPostIds(
-        userId,
-        postIds,
       );
       userBookmarks = new Set(
         bookmarks
           .map((bookmark) => bookmark.postId!)
           .filter(Boolean) as string[],
       );
-
-      // Vérifier si l'utilisateur suit l'auteur
-      isFollowing = await this.followRepository.exists(userId, user.id);
     }
 
     const feedItems: FeedItem[] = posts.map((post: any) => ({
@@ -299,7 +257,6 @@ export class FeedService {
         interactionState: {
           isLiked: userLikes.has(post.id),
           isBookmarked: userBookmarks.has(post.id),
-          isFollowing: isFollowing,
         },
       }),
     }));
@@ -367,33 +324,21 @@ export class FeedService {
     const postIds = posts.map((post: any) => post.id);
     let userLikes: Set<string> = new Set();
     let userBookmarks: Set<string> = new Set();
-    let userFollowing: Set<string> = new Set();
 
     if (userId) {
-      const likes = await this.likeRepository.findByUserAndPostIds(
-        userId,
-        postIds,
-      );
+      // Exécuter les 2 requêtes d'interactions EN PARALLÈLE
+      const [likes, bookmarks] = await Promise.all([
+        this.likeRepository.findByUserAndPostIds(userId, postIds),
+        this.bookmarkRepository.findByUserAndPostIds(userId, postIds),
+      ]);
+
       userLikes = new Set(
         likes.map((like) => like.postId!).filter(Boolean) as string[],
-      );
-
-      const bookmarks = await this.bookmarkRepository.findByUserAndPostIds(
-        userId,
-        postIds,
       );
       userBookmarks = new Set(
         bookmarks
           .map((bookmark) => bookmark.postId!)
           .filter(Boolean) as string[],
-      );
-
-      const follows = await this.followRepository.findByFollowerAndAuthorIds(
-        userId,
-        authorIds,
-      );
-      userFollowing = new Set(
-        follows.map((follow) => follow.followingId).filter(Boolean) as string[],
       );
     }
 
@@ -412,14 +357,11 @@ export class FeedService {
           avatar: post.author.avatar,
           bio: post.author.bio,
           postsCount: authorWithStats?._count?.posts || 0,
-          followersCount: authorWithStats?._count?.followers || 0,
-          followingCount: authorWithStats?._count?.following || 0,
         },
         ...(userId && {
           interactionState: {
             isLiked: userLikes.has(post.id),
             isBookmarked: userBookmarks.has(post.id),
-            isFollowing: userFollowing.has(post.author.id),
           },
         }),
       };
@@ -517,17 +459,18 @@ export class FeedService {
     });
 
     // Conserver l'ordre des bookmarks (les plus récents d'abord)
-    const orderedPosts: PostWithRelations[] = postIds
-      .map((id) => posts.find((post: PostWithRelations) => post.id === id))
-      .filter((post): post is PostWithRelations => post !== undefined);
+    const orderedPosts = postIds
+      .map((id) => posts.find((post) => post.id === id))
+      .filter(
+        (post): post is (typeof posts)[number] => post !== undefined,
+      ) as PostWithRelations[];
 
-    // Récupérer les statistiques des auteurs
+    // Récupérer les statistiques des auteurs et interactions EN PARALLÈLE
     const authorIds = [...new Set(orderedPosts.map((post) => post.authorId))];
-    const authorsWithStats = await this.getAuthorsWithStats(authorIds);
-
-    // Récupérer les interactions (likes, follow) pour chaque post
-    const userLikes = await this.getUserLikes(userId, postIds);
-    const userFollowing = await this.getUserFollowing(userId, authorIds);
+    const [authorsWithStats, userLikes] = await Promise.all([
+      this.getAuthorsWithStats(authorIds),
+      this.getUserLikes(userId, postIds),
+    ]);
 
     // Construire les FeedItems
     const feedItems: FeedItem[] = orderedPosts.map((post) => {
@@ -546,13 +489,10 @@ export class FeedService {
           avatar: post.author.avatar,
           bio: post.author.bio,
           postsCount: authorWithStats?._count?.posts || 0,
-          followersCount: authorWithStats?._count?.followers || 0,
-          followingCount: authorWithStats?._count?.following || 0,
         },
         interactionState: {
           isLiked: userLikes.has(post.id),
           isBookmarked: true,
-          isFollowing: userFollowing.has(post.authorId),
         },
         bookmarkId: bookmark?.id,
       };
@@ -619,39 +559,28 @@ export class FeedService {
       avatar: user.avatar,
       bio: user.bio,
       postsCount: authorWithStats._count?.posts || 0,
-      followersCount: authorWithStats._count?.followers || 0,
-      followingCount: authorWithStats._count?.following || 0,
     };
 
     // Préparer les IDs des posts pour les interactions
     const postIds: string[] = posts.map((post: any) => post.id);
     let userLikes: Set<string> = new Set();
     let userBookmarks: Set<string> = new Set();
-    let isFollowing = false;
 
     if (currentUserId) {
-      // Likes de l'utilisateur sur ces posts
-      const likes = await this.likeRepository.findByUserAndPostIds(
-        currentUserId,
-        postIds,
-      );
+      // Exécuter les 2 requêtes d'interactions EN PARALLÈLE
+      const [likes, bookmarks] = await Promise.all([
+        this.likeRepository.findByUserAndPostIds(currentUserId, postIds),
+        this.bookmarkRepository.findByUserAndPostIds(currentUserId, postIds),
+      ]);
+
       userLikes = new Set(
         likes.map((like) => like.postId!).filter(Boolean) as string[],
-      );
-
-      // Bookmarks de l'utilisateur sur ces posts
-      const bookmarks = await this.bookmarkRepository.findByUserAndPostIds(
-        currentUserId,
-        postIds,
       );
       userBookmarks = new Set(
         bookmarks
           .map((bookmark) => bookmark.postId!)
           .filter(Boolean) as string[],
       );
-
-      // Vérifier si l'utilisateur suit l'auteur
-      isFollowing = await this.followRepository.exists(currentUserId, user.id);
     }
 
     const feedItems: FeedItem[] = posts.map((post: any) => ({
@@ -661,7 +590,6 @@ export class FeedService {
         interactionState: {
           isLiked: userLikes.has(post.id),
           isBookmarked: userBookmarks.has(post.id),
-          isFollowing,
         },
       }),
     }));
@@ -698,21 +626,6 @@ export class FeedService {
     );
   }
 
-  private async getUserFollowing(
-    userId: string,
-    authorIds: string[],
-  ): Promise<Set<string>> {
-    if (authorIds.length === 0) return new Set();
-
-    const follows = await this.followRepository.findByFollowerAndAuthorIds(
-      userId,
-      authorIds,
-    );
-    return new Set(
-      follows.map((follow) => follow.followingId).filter(Boolean) as string[],
-    );
-  }
-
   private async getAuthorWithStats(userId: string): Promise<AuthorWithStats> {
     const author = await prisma.user.findUnique({
       where: { id: userId },
@@ -720,8 +633,6 @@ export class FeedService {
         _count: {
           select: {
             posts: true,
-            followers: true,
-            following: true,
           },
         },
       },
@@ -747,8 +658,6 @@ export class FeedService {
         _count: {
           select: {
             posts: true,
-            followers: true,
-            following: true,
           },
         },
       },

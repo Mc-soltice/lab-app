@@ -3,6 +3,31 @@ import { Bookmark, Prisma, PrismaClient } from "@/prisma/generated/client";
 import { prisma } from "../prisma/client";
 import { BookmarkTargetRef } from "../types/target";
 
+// Type pour les bookmarks avec leurs relations incluses
+export type BookmarkWithRelations = Bookmark & {
+  post: {
+    id: string;
+    title: string;
+    slug: string;
+    coverImage: string | null;
+    authorId: string;
+  } | null;
+  podcast: {
+    id: string;
+    title: string;
+    slug: string;
+    coverImage: string | null;
+    authorId: string;
+  } | null;
+  book: {
+    id: string;
+    title: string;
+    slug: string;
+    coverImage: string | null;
+    authorId: string;
+  } | null;
+};
+
 export class BookmarkRepository {
   private db: PrismaClient;
 
@@ -10,9 +35,7 @@ export class BookmarkRepository {
     this.db = prisma;
   }
 
-  private targetKey(
-    target: BookmarkTargetRef,
-  ): "postId" | "podcastId" | "bookId" {
+  private targetKey(target: BookmarkTargetRef): "postId" | "podcastId" | "bookId" {
     return `${target.type}Id` as "postId" | "podcastId" | "bookId";
   }
 
@@ -24,10 +47,7 @@ export class BookmarkRepository {
     return this.db.bookmark.findFirst({ where: { userId, [key]: target.id } });
   }
 
-  async createForTarget(
-    userId: string,
-    target: BookmarkTargetRef,
-  ): Promise<Bookmark> {
+  async createForTarget(userId: string, target: BookmarkTargetRef): Promise<Bookmark> {
     const key = this.targetKey(target);
     return this.db.bookmark.create({
       data: { userId, [key]: target.id } as Prisma.BookmarkUncheckedCreateInput,
@@ -42,7 +62,7 @@ export class BookmarkRepository {
     userId: string,
     page = 1,
     limit = 10,
-  ): Promise<{ data: Bookmark[]; total: number }> {
+  ): Promise<{ data: BookmarkWithRelations[]; total: number }> {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       this.db.bookmark.findMany({
@@ -52,13 +72,31 @@ export class BookmarkRepository {
         orderBy: { createdAt: "desc" },
         include: {
           post: {
-            select: { id: true, title: true, slug: true, coverImage: true },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              coverImage: true,
+              authorId: true,
+            },
           },
           podcast: {
-            select: { id: true, title: true, slug: true, coverImage: true },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              coverImage: true,
+              authorId: true,
+            },
           },
           book: {
-            select: { id: true, title: true, slug: true, coverImage: true },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              coverImage: true,
+              authorId: true,
+            },
           },
         },
       }),
@@ -66,10 +104,7 @@ export class BookmarkRepository {
     ]);
     return { data, total };
   }
-  async findByUserAndPostIds(
-    userId: string,
-    postIds: string[],
-  ): Promise<Bookmark[]> {
+  async findByUserAndPostIds(userId: string, postIds: string[]): Promise<Bookmark[]> {
     if (postIds.length === 0) return [];
 
     return this.db.bookmark.findMany({

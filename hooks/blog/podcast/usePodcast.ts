@@ -1,6 +1,7 @@
 // hooks/blog/podcast/usePodcast.ts
 import { useAuthContext } from "@/contexts/auth/auth.context";
 import { useCategories } from "@/hooks/blog/post/useCategories";
+import { useEmissions } from "@/hooks/blog/post/useEmissions";
 import { useTags } from "@/hooks/blog/post/useTags";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
@@ -10,10 +11,12 @@ export interface PodcastFormData {
   title: string;
   description: string;
   audioUrl: string;
+  mediaType: "AUDIO" | "VIDEO";
   coverImage: string;
   duration: number;
   transcript: string;
   categoryId: string;
+  emissionId: string;
   tagIds: string[];
   status: "DRAFT" | "PUBLISHED";
 }
@@ -22,6 +25,7 @@ export interface PodcastFormErrors {
   title?: string;
   description?: string;
   audioUrl?: string;
+  mediaType?: string;
   duration?: string;
   category?: string;
   tags?: string;
@@ -38,15 +42,17 @@ const initialFormData: PodcastFormData = {
   title: "",
   description: "",
   audioUrl: "",
+  mediaType: "AUDIO",
   coverImage: "",
   duration: 0,
   transcript: "",
   categoryId: "",
+  emissionId: "",
   tagIds: [],
   status: "DRAFT",
 };
 // Validation URL audio
-const isValidAudioUrl = (url: string): boolean => {
+const isValidMediaUrl = (url: string): boolean => {
   if (!url) return false;
 
   try {
@@ -66,8 +72,9 @@ export function usePodcast(options: UsePodcastOptions = {}) {
     ...options.initialData,
   });
 
-  // Utiliser les hooks de catégories et tags
+  // Utiliser les hooks de catégories, émissions et tags
   const categories = useCategories();
+  const emissions = useEmissions();
   const tags = useTags();
 
   // Validation
@@ -88,16 +95,15 @@ export function usePodcast(options: UsePodcastOptions = {}) {
       if (!formData.description?.trim()) {
         errors.description = "La description est requise";
       } else if (formData.description.length < 10) {
-        errors.description =
-          "La description doit contenir au moins 10 caractères";
+        errors.description = "La description doit contenir au moins 10 caractères";
       }
     }
 
     if (hasAttemptedSubmit || formData.audioUrl.trim()) {
       if (!formData.audioUrl.trim()) {
         errors.audioUrl = "Le fichier audio est requis";
-      } else if (!isValidAudioUrl(formData.audioUrl)) {
-        errors.audioUrl = "URL audio invalide";
+      } else if (!isValidMediaUrl(formData.audioUrl)) {
+        errors.audioUrl = "URL média invalide";
       }
     }
 
@@ -108,6 +114,9 @@ export function usePodcast(options: UsePodcastOptions = {}) {
     if (hasAttemptedSubmit) {
       if (!formData.categoryId) {
         errors.category = "Veuillez sélectionner une catégorie";
+      }
+      if (!formData.emissionId) {
+        errors.category = "Veuillez sélectionner une émission";
       }
       if (!formData.tagIds || formData.tagIds.length === 0) {
         errors.tags = "Veuillez sélectionner au moins un tag";
@@ -123,8 +132,9 @@ export function usePodcast(options: UsePodcastOptions = {}) {
       formData.title.trim().length <= 200 &&
       formData.description?.trim().length >= 10 &&
       !!formData.audioUrl.trim() &&
-      isValidAudioUrl(formData.audioUrl) &&
+      isValidMediaUrl(formData.audioUrl) &&
       !!formData.categoryId &&
+      !!formData.emissionId &&
       (formData.tagIds?.length || 0) > 0
     );
   }, [formData]);
@@ -136,10 +146,11 @@ export function usePodcast(options: UsePodcastOptions = {}) {
     },
     [],
   );
-  // Fonction pour mettre à jour l'audio avec durée
+  // Mettre à jour le média avec sa durée et son type.
   const updateAudio = useCallback(
-    (url: string, duration?: number) => {
+    (url: string, duration?: number, mediaType?: "AUDIO" | "VIDEO") => {
       updateField("audioUrl", url);
+      if (mediaType) updateField("mediaType", mediaType);
       if (duration !== undefined && duration > 0) {
         updateField("duration", duration);
       }
@@ -176,10 +187,12 @@ export function usePodcast(options: UsePodcastOptions = {}) {
           title: formData.title.trim(),
           description: formData.description.trim(),
           audioUrl: formData.audioUrl.trim(),
+          mediaType: formData.mediaType,
           coverImage: formData.coverImage || undefined,
           duration: formData.duration,
           transcript: formData.transcript?.trim() || undefined,
           categoryId: formData.categoryId,
+          emissionId: formData.emissionId || undefined,
           tags: formData.tagIds,
           status: formData.status,
         };
@@ -194,9 +207,7 @@ export function usePodcast(options: UsePodcastOptions = {}) {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(
-            errorData.error || "Erreur lors de la création du podcast",
-          );
+          throw new Error(errorData.error || "Erreur lors de la création du podcast");
         }
 
         const result = await response.json();
@@ -251,6 +262,14 @@ export function usePodcast(options: UsePodcastOptions = {}) {
       selectedCategoryId: formData.categoryId,
       setSelectedCategoryId: (id: string) => updateField("categoryId", id),
       getCategoryName: categories.getCategoryName,
+    },
+
+    // Émissions
+    emissions: {
+      ...emissions,
+      selectedEmissionId: formData.emissionId,
+      setSelectedEmissionId: (id: string) => updateField("emissionId", id),
+      getEmissionName: emissions.getEmissionName,
     },
 
     // Tags

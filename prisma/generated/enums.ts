@@ -21,7 +21,6 @@ export type PostStatus = (typeof PostStatus)[keyof typeof PostStatus]
 export const NotificationType = {
   LIKE: 'LIKE',
   COMMENT: 'COMMENT',
-  FOLLOW: 'FOLLOW',
   SHARE: 'SHARE'
 } as const
 

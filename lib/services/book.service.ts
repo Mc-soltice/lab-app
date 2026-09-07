@@ -8,16 +8,11 @@ import {
   ForbiddenException,
   NotFoundException,
 } from "../exceptions";
-import { BookChapterRepository } from "../repositories/book-chapter.repository";
 import { BookRepository } from "../repositories/book.repository";
 import { CategoryRepository } from "../repositories/category.repository";
 import { TagRepository } from "../repositories/tag.repository";
 import { UserRepository } from "../repositories/user.repository";
-import {
-  CreateBookSchema,
-  CreateChapterSchema,
-  UpdateBookSchema,
-} from "../validation/schemas";
+import { CreateBookSchema, UpdateBookSchema } from "../validation/schemas";
 
 export interface BookWithRelations {
   id: string;
@@ -68,7 +63,6 @@ export interface BookWithRelations {
   interactionState?: {
     isLiked?: boolean;
     isBookmarked?: boolean;
-    isFollowing?: boolean;
   };
 }
 
@@ -100,7 +94,6 @@ export async function getBooks(
 
 export class BookService {
   private bookRepository = new BookRepository();
-  private chapterRepository = new BookChapterRepository();
   private userRepository = new UserRepository();
   private categoryRepository = new CategoryRepository();
   private tagRepository = new TagRepository();
@@ -141,9 +134,7 @@ export class BookService {
       status: data.status || "DRAFT",
       publishedAt: data.status === "PUBLISHED" ? new Date() : null,
       author: { connect: { id: authorId } },
-      category: data.categoryId
-        ? { connect: { id: data.categoryId } }
-        : undefined,
+      category: data.categoryId ? { connect: { id: data.categoryId } } : undefined,
       tags: data.tags?.length
         ? {
             create: data.tags.map((tagId) => ({
@@ -164,10 +155,7 @@ export class BookService {
   /**
    * Récupérer un livre par son slug
    */
-  async getBookBySlug(
-    slug: string,
-    userId?: string,
-  ): Promise<BookWithRelations> {
+  async getBookBySlug(slug: string, userId?: string): Promise<BookWithRelations> {
     const book = await this.bookRepository.findBySlugWithRelations(slug);
 
     if (!book) {
@@ -180,9 +168,6 @@ export class BookService {
         throw new NotFoundException("Livre non trouvé");
       }
     }
-
-    // Incrémenter les vues
-    await this.bookRepository.incrementViews(book.id);
 
     // Récupérer les relations
     return this.getBookWithRelations(book.id, userId);
@@ -222,10 +207,7 @@ export class BookService {
     // Récupérer les interactions de l'utilisateur
     let interactionState = undefined;
     if (userId) {
-      interactionState = await this.bookRepository.getUserInteractions(
-        id,
-        userId,
-      );
+      interactionState = await this.bookRepository.getUserInteractions(id, userId);
     }
 
     const normalizedBook = {
@@ -406,9 +388,7 @@ export class BookService {
     }
 
     if (book.authorId !== userId) {
-      throw new ForbiddenException(
-        "Vous n'êtes pas autorisé à modifier ce livre",
-      );
+      throw new ForbiddenException("Vous n'êtes pas autorisé à modifier ce livre");
     }
 
     // Si le titre change, mettre à jour le slug
@@ -474,55 +454,10 @@ export class BookService {
     }
 
     if (book.authorId !== userId) {
-      throw new ForbiddenException(
-        "Vous n'êtes pas autorisé à supprimer ce livre",
-      );
+      throw new ForbiddenException("Vous n'êtes pas autorisé à supprimer ce livre");
     }
 
     await this.bookRepository.delete(id);
-  }
-
-  /**
-   * Ajouter un chapitre à un livre
-   */
-  async addChapter(
-    bookId: string,
-    userId: string,
-    data: z.infer<typeof CreateChapterSchema>,
-  ): Promise<unknown> {
-    const book = await this.bookRepository.findById(bookId);
-    if (!book) {
-      throw new NotFoundException("Livre non trouvé");
-    }
-
-    if (book.authorId !== userId) {
-      throw new ForbiddenException(
-        "Vous n'êtes pas autorisé à ajouter un chapitre",
-      );
-    }
-
-    // Vérifier que le livre est publié ou en cours d'écriture
-    if (book.status === "PUBLISHED" && !data.publishNow) {
-      throw new BadRequestException(
-        "Impossible d'ajouter un brouillon à un livre publié",
-      );
-    }
-
-    const order = await this.chapterRepository.findNextOrder(bookId);
-
-    const chapter = await this.chapterRepository.create({
-      title: data.title,
-      content: data.content,
-      order,
-      publishedAt: data.publishNow ? new Date() : null,
-      book: { connect: { id: bookId } },
-    });
-
-    if (data.publishNow) {
-      await this.bookRepository.incrementChaptersCount(bookId);
-    }
-
-    return chapter;
   }
 
   /**
@@ -542,9 +477,7 @@ export class BookService {
     if (priceValue > 0) {
       // Vérifier si l'utilisateur a acheté le livre
       if (!userId) {
-        throw new ForbiddenException(
-          "Connectez-vous pour télécharger ce livre",
-        );
+        throw new ForbiddenException("Connectez-vous pour télécharger ce livre");
       }
 
       // Ici, vérifier si l'utilisateur a acheté le livre
@@ -567,11 +500,7 @@ export class BookService {
   /**
    * Rechercher des livres
    */
-  async searchBooks(
-    query: string,
-    page = 1,
-    limit = 10,
-  ): Promise<BooksListResponse> {
+  async searchBooks(query: string, page = 1, limit = 10): Promise<BooksListResponse> {
     if (!query || query.length < 2) {
       return {
         books: [],

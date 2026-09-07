@@ -1,6 +1,6 @@
 import { Providers } from "@/components/providerts/providers";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -11,6 +11,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,16 +30,48 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="fr">
       <body
-        style={{
-          backgroundColor: "var(--bg-primary)",
-          color: "var(--text-primary)",
-        }}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased`}
+        suppressHydrationWarning
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var cleanup = function() {
+                    var html = document.documentElement;
+                    var body = document.body;
+                    if (html) {
+                      var attrs = html.attributes;
+                      for (var i = attrs.length - 1; i >= 0; i--) {
+                        var attr = attrs[i];
+                        if (attr.name.indexOf('cz-') === 0) {
+                          html.removeAttribute(attr.name);
+                        }
+                      }
+                    }
+                    if (body) {
+                      var bodyAttrs = body.attributes;
+                      for (var j = bodyAttrs.length - 1; j >= 0; j--) {
+                        var bodyAttr = bodyAttrs[j];
+                        if (bodyAttr.name.indexOf('cz-') === 0) {
+                          body.removeAttribute(bodyAttr.name);
+                        }
+                      }
+                    }
+                  };
+                  if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', cleanup);
+                  } else {
+                    cleanup();
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

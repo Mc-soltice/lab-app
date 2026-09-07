@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Category: 'Category',
+  Emission: 'Emission',
   Tag: 'Tag',
   Post: 'Post',
   PostTag: 'PostTag',
@@ -396,7 +397,6 @@ export const ModelName = {
   Comment: 'Comment',
   Like: 'Like',
   Bookmark: 'Bookmark',
-  Follow: 'Follow',
   Notification: 'Notification'
 } as const
 
@@ -413,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "category" | "tag" | "post" | "postTag" | "podcast" | "podcastTag" | "book" | "bookTag" | "comment" | "like" | "bookmark" | "follow" | "notification"
+    modelProps: "user" | "category" | "emission" | "tag" | "post" | "postTag" | "podcast" | "podcastTag" | "book" | "bookTag" | "comment" | "like" | "bookmark" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -546,6 +546,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CategoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    Emission: {
+      payload: Prisma.$EmissionPayload<ExtArgs>
+      fields: Prisma.EmissionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmissionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmissionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload>
+        }
+        findFirst: {
+          args: Prisma.EmissionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmissionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload>
+        }
+        findMany: {
+          args: Prisma.EmissionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload>[]
+        }
+        create: {
+          args: Prisma.EmissionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload>
+        }
+        createMany: {
+          args: Prisma.EmissionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.EmissionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload>
+        }
+        update: {
+          args: Prisma.EmissionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmissionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmissionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.EmissionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmissionPayload>
+        }
+        aggregate: {
+          args: Prisma.EmissionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmission>
+        }
+        groupBy: {
+          args: Prisma.EmissionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmissionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmissionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmissionCountAggregateOutputType> | number
         }
       }
     }
@@ -1209,72 +1275,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Follow: {
-      payload: Prisma.$FollowPayload<ExtArgs>
-      fields: Prisma.FollowFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.FollowFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.FollowFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload>
-        }
-        findFirst: {
-          args: Prisma.FollowFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.FollowFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload>
-        }
-        findMany: {
-          args: Prisma.FollowFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload>[]
-        }
-        create: {
-          args: Prisma.FollowCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload>
-        }
-        createMany: {
-          args: Prisma.FollowCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.FollowDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload>
-        }
-        update: {
-          args: Prisma.FollowUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload>
-        }
-        deleteMany: {
-          args: Prisma.FollowDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.FollowUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.FollowUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FollowPayload>
-        }
-        aggregate: {
-          args: Prisma.FollowAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateFollow>
-        }
-        groupBy: {
-          args: Prisma.FollowGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.FollowGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.FollowCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.FollowCountAggregateOutputType> | number
-        }
-      }
-    }
     Notification: {
       payload: Prisma.$NotificationPayload<ExtArgs>
       fields: Prisma.NotificationFieldRefs
@@ -1411,6 +1411,18 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const EmissionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmissionScalarFieldEnum = (typeof EmissionScalarFieldEnum)[keyof typeof EmissionScalarFieldEnum]
+
+
 export const TagScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1458,6 +1470,7 @@ export const PodcastScalarFieldEnum = {
   slug: 'slug',
   description: 'description',
   audioUrl: 'audioUrl',
+  mediaType: 'mediaType',
   coverImage: 'coverImage',
   duration: 'duration',
   transcript: 'transcript',
@@ -1470,7 +1483,8 @@ export const PodcastScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   authorId: 'authorId',
-  categoryId: 'categoryId'
+  categoryId: 'categoryId',
+  emissionId: 'emissionId'
 } as const
 
 export type PodcastScalarFieldEnum = (typeof PodcastScalarFieldEnum)[keyof typeof PodcastScalarFieldEnum]
@@ -1491,6 +1505,7 @@ export const BookScalarFieldEnum = {
   synopsis: 'synopsis',
   price: 'price',
   coverImage: 'coverImage',
+  fileUrl: 'fileUrl',
   status: 'status',
   downloadCount: 'downloadCount',
   likesCount: 'likesCount',
@@ -1556,16 +1571,6 @@ export const BookmarkScalarFieldEnum = {
 export type BookmarkScalarFieldEnum = (typeof BookmarkScalarFieldEnum)[keyof typeof BookmarkScalarFieldEnum]
 
 
-export const FollowScalarFieldEnum = {
-  id: 'id',
-  createdAt: 'createdAt',
-  followerId: 'followerId',
-  followingId: 'followingId'
-} as const
-
-export type FollowScalarFieldEnum = (typeof FollowScalarFieldEnum)[keyof typeof FollowScalarFieldEnum]
-
-
 export const NotificationScalarFieldEnum = {
   id: 'id',
   type: 'type',
@@ -1624,6 +1629,16 @@ export const CategoryOrderByRelevanceFieldEnum = {
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
 
 
+export const EmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description'
+} as const
+
+export type EmissionOrderByRelevanceFieldEnum = (typeof EmissionOrderByRelevanceFieldEnum)[keyof typeof EmissionOrderByRelevanceFieldEnum]
+
+
 export const TagOrderByRelevanceFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1662,10 +1677,12 @@ export const PodcastOrderByRelevanceFieldEnum = {
   slug: 'slug',
   description: 'description',
   audioUrl: 'audioUrl',
+  mediaType: 'mediaType',
   coverImage: 'coverImage',
   transcript: 'transcript',
   authorId: 'authorId',
-  categoryId: 'categoryId'
+  categoryId: 'categoryId',
+  emissionId: 'emissionId'
 } as const
 
 export type PodcastOrderByRelevanceFieldEnum = (typeof PodcastOrderByRelevanceFieldEnum)[keyof typeof PodcastOrderByRelevanceFieldEnum]
@@ -1685,6 +1702,7 @@ export const BookOrderByRelevanceFieldEnum = {
   slug: 'slug',
   synopsis: 'synopsis',
   coverImage: 'coverImage',
+  fileUrl: 'fileUrl',
   authorId: 'authorId',
   categoryId: 'categoryId'
 } as const
@@ -1734,15 +1752,6 @@ export const BookmarkOrderByRelevanceFieldEnum = {
 } as const
 
 export type BookmarkOrderByRelevanceFieldEnum = (typeof BookmarkOrderByRelevanceFieldEnum)[keyof typeof BookmarkOrderByRelevanceFieldEnum]
-
-
-export const FollowOrderByRelevanceFieldEnum = {
-  id: 'id',
-  followerId: 'followerId',
-  followingId: 'followingId'
-} as const
-
-export type FollowOrderByRelevanceFieldEnum = (typeof FollowOrderByRelevanceFieldEnum)[keyof typeof FollowOrderByRelevanceFieldEnum]
 
 
 export const NotificationOrderByRelevanceFieldEnum = {
@@ -1939,6 +1948,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   category?: Prisma.CategoryOmit
+  emission?: Prisma.EmissionOmit
   tag?: Prisma.TagOmit
   post?: Prisma.PostOmit
   postTag?: Prisma.PostTagOmit
@@ -1949,7 +1959,6 @@ export type GlobalOmitConfig = {
   comment?: Prisma.CommentOmit
   like?: Prisma.LikeOmit
   bookmark?: Prisma.BookmarkOmit
-  follow?: Prisma.FollowOmit
   notification?: Prisma.NotificationOmit
 }
 

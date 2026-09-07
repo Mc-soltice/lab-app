@@ -12,7 +12,6 @@ import {
   Heart,
   MessageCircle,
   Tag,
-  UserCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -78,24 +77,18 @@ export default function BookCard({
   const {
     isLiked,
     isBookmarked,
-    isFollowing,
     likesCount,
     isLiking,
     isBookmarking,
-    isFollowingAction,
     toggleLike,
     toggleBookmark,
-    toggleFollow,
-    canFollow,
   } = useInteractions({
     targetId: book.id,
     targetType: "book",
     authorId: author.id,
-    authorUsername: author.username,
     currentUserId,
     initialLiked: interactionState?.isLiked || false,
     initialBookmarked: interactionState?.isBookmarked || false,
-    initialFollowing: interactionState?.isFollowing || false,
     initialLikesCount: book.likesCount || 0,
   });
 
@@ -178,35 +171,11 @@ export default function BookCard({
             {publishedDate}
           </span>
         </Link>
-
-        {canFollow && (
-          <button
-            onClick={toggleFollow}
-            disabled={isFollowingAction}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 shrink-0 active:scale-95 ${
-              isFollowing
-                ? "bg-neutral-800 text-white hover:bg-neutral-700 ring-1 ring-white/10"
-                : "bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 ring-1 ring-blue-500/20"
-            } ${isFollowingAction ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {isFollowing ? (
-              <>
-                <UserCheck className="h-3.5 w-3.5" />
-                <span>Suivi</span>
-              </>
-            ) : (
-              <span>Suivre</span>
-            )}
-          </button>
-        )}
       </div>
 
       {/* Cover du livre */}
       <div className="relative w-full aspect-3/4 overflow-hidden">
-        <Link
-          href={`/book/${book.slug}`}
-          className="block group h-full w-full"
-        >
+        <Link href={`/book/${book.slug}`} className="block group h-full w-full">
           {book.coverImage ? (
             <OptimizedImage
               src={book.coverImage}

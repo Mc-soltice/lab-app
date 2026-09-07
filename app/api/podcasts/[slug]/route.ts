@@ -34,7 +34,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const existing = await podcastRepository.findBySlug(params.slug);
+    const existing = await podcastRepository.findBySlug(slug);
     if (!existing) throw new NotFoundException("Podcast non trouvé");
 
     const body = await req.json();

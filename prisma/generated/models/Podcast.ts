@@ -48,6 +48,7 @@ export type PodcastMinAggregateOutputType = {
   slug: string | null
   description: string | null
   audioUrl: string | null
+  mediaType: string | null
   coverImage: string | null
   duration: number | null
   transcript: string | null
@@ -61,6 +62,7 @@ export type PodcastMinAggregateOutputType = {
   updatedAt: Date | null
   authorId: string | null
   categoryId: string | null
+  emissionId: string | null
 }
 
 export type PodcastMaxAggregateOutputType = {
@@ -69,6 +71,7 @@ export type PodcastMaxAggregateOutputType = {
   slug: string | null
   description: string | null
   audioUrl: string | null
+  mediaType: string | null
   coverImage: string | null
   duration: number | null
   transcript: string | null
@@ -82,6 +85,7 @@ export type PodcastMaxAggregateOutputType = {
   updatedAt: Date | null
   authorId: string | null
   categoryId: string | null
+  emissionId: string | null
 }
 
 export type PodcastCountAggregateOutputType = {
@@ -90,6 +94,7 @@ export type PodcastCountAggregateOutputType = {
   slug: number
   description: number
   audioUrl: number
+  mediaType: number
   coverImage: number
   duration: number
   transcript: number
@@ -103,6 +108,7 @@ export type PodcastCountAggregateOutputType = {
   updatedAt: number
   authorId: number
   categoryId: number
+  emissionId: number
   _all: number
 }
 
@@ -129,6 +135,7 @@ export type PodcastMinAggregateInputType = {
   slug?: true
   description?: true
   audioUrl?: true
+  mediaType?: true
   coverImage?: true
   duration?: true
   transcript?: true
@@ -142,6 +149,7 @@ export type PodcastMinAggregateInputType = {
   updatedAt?: true
   authorId?: true
   categoryId?: true
+  emissionId?: true
 }
 
 export type PodcastMaxAggregateInputType = {
@@ -150,6 +158,7 @@ export type PodcastMaxAggregateInputType = {
   slug?: true
   description?: true
   audioUrl?: true
+  mediaType?: true
   coverImage?: true
   duration?: true
   transcript?: true
@@ -163,6 +172,7 @@ export type PodcastMaxAggregateInputType = {
   updatedAt?: true
   authorId?: true
   categoryId?: true
+  emissionId?: true
 }
 
 export type PodcastCountAggregateInputType = {
@@ -171,6 +181,7 @@ export type PodcastCountAggregateInputType = {
   slug?: true
   description?: true
   audioUrl?: true
+  mediaType?: true
   coverImage?: true
   duration?: true
   transcript?: true
@@ -184,6 +195,7 @@ export type PodcastCountAggregateInputType = {
   updatedAt?: true
   authorId?: true
   categoryId?: true
+  emissionId?: true
   _all?: true
 }
 
@@ -279,6 +291,7 @@ export type PodcastGroupByOutputType = {
   slug: string
   description: string | null
   audioUrl: string
+  mediaType: string
   coverImage: string | null
   duration: number
   transcript: string | null
@@ -292,6 +305,7 @@ export type PodcastGroupByOutputType = {
   updatedAt: Date
   authorId: string
   categoryId: string | null
+  emissionId: string | null
   _count: PodcastCountAggregateOutputType | null
   _avg: PodcastAvgAggregateOutputType | null
   _sum: PodcastSumAggregateOutputType | null
@@ -323,6 +337,7 @@ export type PodcastWhereInput = {
   slug?: Prisma.StringFilter<"Podcast"> | string
   description?: Prisma.StringNullableFilter<"Podcast"> | string | null
   audioUrl?: Prisma.StringFilter<"Podcast"> | string
+  mediaType?: Prisma.StringFilter<"Podcast"> | string
   coverImage?: Prisma.StringNullableFilter<"Podcast"> | string | null
   duration?: Prisma.IntFilter<"Podcast"> | number
   transcript?: Prisma.StringNullableFilter<"Podcast"> | string | null
@@ -336,8 +351,10 @@ export type PodcastWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Podcast"> | Date | string
   authorId?: Prisma.StringFilter<"Podcast"> | string
   categoryId?: Prisma.StringNullableFilter<"Podcast"> | string | null
+  emissionId?: Prisma.StringNullableFilter<"Podcast"> | string | null
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
+  emission?: Prisma.XOR<Prisma.EmissionNullableScalarRelationFilter, Prisma.EmissionWhereInput> | null
   tags?: Prisma.PodcastTagListRelationFilter
   likes?: Prisma.LikeListRelationFilter
   comments?: Prisma.CommentListRelationFilter
@@ -350,6 +367,7 @@ export type PodcastOrderByWithRelationInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   audioUrl?: Prisma.SortOrder
+  mediaType?: Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
   duration?: Prisma.SortOrder
   transcript?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -363,8 +381,10 @@ export type PodcastOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emissionId?: Prisma.SortOrderInput | Prisma.SortOrder
   author?: Prisma.UserOrderByWithRelationInput
   category?: Prisma.CategoryOrderByWithRelationInput
+  emission?: Prisma.EmissionOrderByWithRelationInput
   tags?: Prisma.PodcastTagOrderByRelationAggregateInput
   likes?: Prisma.LikeOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
@@ -381,6 +401,7 @@ export type PodcastWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Podcast"> | string
   description?: Prisma.StringNullableFilter<"Podcast"> | string | null
   audioUrl?: Prisma.StringFilter<"Podcast"> | string
+  mediaType?: Prisma.StringFilter<"Podcast"> | string
   coverImage?: Prisma.StringNullableFilter<"Podcast"> | string | null
   duration?: Prisma.IntFilter<"Podcast"> | number
   transcript?: Prisma.StringNullableFilter<"Podcast"> | string | null
@@ -394,8 +415,10 @@ export type PodcastWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Podcast"> | Date | string
   authorId?: Prisma.StringFilter<"Podcast"> | string
   categoryId?: Prisma.StringNullableFilter<"Podcast"> | string | null
+  emissionId?: Prisma.StringNullableFilter<"Podcast"> | string | null
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
+  emission?: Prisma.XOR<Prisma.EmissionNullableScalarRelationFilter, Prisma.EmissionWhereInput> | null
   tags?: Prisma.PodcastTagListRelationFilter
   likes?: Prisma.LikeListRelationFilter
   comments?: Prisma.CommentListRelationFilter
@@ -408,6 +431,7 @@ export type PodcastOrderByWithAggregationInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   audioUrl?: Prisma.SortOrder
+  mediaType?: Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
   duration?: Prisma.SortOrder
   transcript?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -421,6 +445,7 @@ export type PodcastOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emissionId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PodcastCountOrderByAggregateInput
   _avg?: Prisma.PodcastAvgOrderByAggregateInput
   _max?: Prisma.PodcastMaxOrderByAggregateInput
@@ -437,6 +462,7 @@ export type PodcastScalarWhereWithAggregatesInput = {
   slug?: Prisma.StringWithAggregatesFilter<"Podcast"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Podcast"> | string | null
   audioUrl?: Prisma.StringWithAggregatesFilter<"Podcast"> | string
+  mediaType?: Prisma.StringWithAggregatesFilter<"Podcast"> | string
   coverImage?: Prisma.StringNullableWithAggregatesFilter<"Podcast"> | string | null
   duration?: Prisma.IntWithAggregatesFilter<"Podcast"> | number
   transcript?: Prisma.StringNullableWithAggregatesFilter<"Podcast"> | string | null
@@ -450,6 +476,7 @@ export type PodcastScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Podcast"> | Date | string
   authorId?: Prisma.StringWithAggregatesFilter<"Podcast"> | string
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"Podcast"> | string | null
+  emissionId?: Prisma.StringNullableWithAggregatesFilter<"Podcast"> | string | null
 }
 
 export type PodcastCreateInput = {
@@ -458,6 +485,7 @@ export type PodcastCreateInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -471,6 +499,7 @@ export type PodcastCreateInput = {
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutPodcastsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPodcastsInput
+  emission?: Prisma.EmissionCreateNestedOneWithoutPodcastsInput
   tags?: Prisma.PodcastTagCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentCreateNestedManyWithoutPodcastInput
@@ -483,6 +512,7 @@ export type PodcastUncheckedCreateInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -496,6 +526,7 @@ export type PodcastUncheckedCreateInput = {
   updatedAt?: Date | string
   authorId: string
   categoryId?: string | null
+  emissionId?: string | null
   tags?: Prisma.PodcastTagUncheckedCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPodcastInput
@@ -508,6 +539,7 @@ export type PodcastUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -521,6 +553,7 @@ export type PodcastUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutPodcastsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPodcastsNestedInput
+  emission?: Prisma.EmissionUpdateOneWithoutPodcastsNestedInput
   tags?: Prisma.PodcastTagUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPodcastNestedInput
@@ -533,6 +566,7 @@ export type PodcastUncheckedUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -546,6 +580,7 @@ export type PodcastUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.PodcastTagUncheckedUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPodcastNestedInput
@@ -558,6 +593,7 @@ export type PodcastCreateManyInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -571,6 +607,7 @@ export type PodcastCreateManyInput = {
   updatedAt?: Date | string
   authorId: string
   categoryId?: string | null
+  emissionId?: string | null
 }
 
 export type PodcastUpdateManyMutationInput = {
@@ -579,6 +616,7 @@ export type PodcastUpdateManyMutationInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -598,6 +636,7 @@ export type PodcastUncheckedUpdateManyInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -611,6 +650,7 @@ export type PodcastUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PodcastListRelationFilter = {
@@ -635,6 +675,7 @@ export type PodcastCountOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
   audioUrl?: Prisma.SortOrder
+  mediaType?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   transcript?: Prisma.SortOrder
@@ -648,6 +689,7 @@ export type PodcastCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  emissionId?: Prisma.SortOrder
 }
 
 export type PodcastAvgOrderByAggregateInput = {
@@ -664,6 +706,7 @@ export type PodcastMaxOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
   audioUrl?: Prisma.SortOrder
+  mediaType?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   transcript?: Prisma.SortOrder
@@ -677,6 +720,7 @@ export type PodcastMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  emissionId?: Prisma.SortOrder
 }
 
 export type PodcastMinOrderByAggregateInput = {
@@ -685,6 +729,7 @@ export type PodcastMinOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
   audioUrl?: Prisma.SortOrder
+  mediaType?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   transcript?: Prisma.SortOrder
@@ -698,6 +743,7 @@ export type PodcastMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
+  emissionId?: Prisma.SortOrder
 }
 
 export type PodcastSumOrderByAggregateInput = {
@@ -802,6 +848,48 @@ export type PodcastUncheckedUpdateManyWithoutCategoryNestedInput = {
   deleteMany?: Prisma.PodcastScalarWhereInput | Prisma.PodcastScalarWhereInput[]
 }
 
+export type PodcastCreateNestedManyWithoutEmissionInput = {
+  create?: Prisma.XOR<Prisma.PodcastCreateWithoutEmissionInput, Prisma.PodcastUncheckedCreateWithoutEmissionInput> | Prisma.PodcastCreateWithoutEmissionInput[] | Prisma.PodcastUncheckedCreateWithoutEmissionInput[]
+  connectOrCreate?: Prisma.PodcastCreateOrConnectWithoutEmissionInput | Prisma.PodcastCreateOrConnectWithoutEmissionInput[]
+  createMany?: Prisma.PodcastCreateManyEmissionInputEnvelope
+  connect?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+}
+
+export type PodcastUncheckedCreateNestedManyWithoutEmissionInput = {
+  create?: Prisma.XOR<Prisma.PodcastCreateWithoutEmissionInput, Prisma.PodcastUncheckedCreateWithoutEmissionInput> | Prisma.PodcastCreateWithoutEmissionInput[] | Prisma.PodcastUncheckedCreateWithoutEmissionInput[]
+  connectOrCreate?: Prisma.PodcastCreateOrConnectWithoutEmissionInput | Prisma.PodcastCreateOrConnectWithoutEmissionInput[]
+  createMany?: Prisma.PodcastCreateManyEmissionInputEnvelope
+  connect?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+}
+
+export type PodcastUpdateManyWithoutEmissionNestedInput = {
+  create?: Prisma.XOR<Prisma.PodcastCreateWithoutEmissionInput, Prisma.PodcastUncheckedCreateWithoutEmissionInput> | Prisma.PodcastCreateWithoutEmissionInput[] | Prisma.PodcastUncheckedCreateWithoutEmissionInput[]
+  connectOrCreate?: Prisma.PodcastCreateOrConnectWithoutEmissionInput | Prisma.PodcastCreateOrConnectWithoutEmissionInput[]
+  upsert?: Prisma.PodcastUpsertWithWhereUniqueWithoutEmissionInput | Prisma.PodcastUpsertWithWhereUniqueWithoutEmissionInput[]
+  createMany?: Prisma.PodcastCreateManyEmissionInputEnvelope
+  set?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  disconnect?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  delete?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  connect?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  update?: Prisma.PodcastUpdateWithWhereUniqueWithoutEmissionInput | Prisma.PodcastUpdateWithWhereUniqueWithoutEmissionInput[]
+  updateMany?: Prisma.PodcastUpdateManyWithWhereWithoutEmissionInput | Prisma.PodcastUpdateManyWithWhereWithoutEmissionInput[]
+  deleteMany?: Prisma.PodcastScalarWhereInput | Prisma.PodcastScalarWhereInput[]
+}
+
+export type PodcastUncheckedUpdateManyWithoutEmissionNestedInput = {
+  create?: Prisma.XOR<Prisma.PodcastCreateWithoutEmissionInput, Prisma.PodcastUncheckedCreateWithoutEmissionInput> | Prisma.PodcastCreateWithoutEmissionInput[] | Prisma.PodcastUncheckedCreateWithoutEmissionInput[]
+  connectOrCreate?: Prisma.PodcastCreateOrConnectWithoutEmissionInput | Prisma.PodcastCreateOrConnectWithoutEmissionInput[]
+  upsert?: Prisma.PodcastUpsertWithWhereUniqueWithoutEmissionInput | Prisma.PodcastUpsertWithWhereUniqueWithoutEmissionInput[]
+  createMany?: Prisma.PodcastCreateManyEmissionInputEnvelope
+  set?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  disconnect?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  delete?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  connect?: Prisma.PodcastWhereUniqueInput | Prisma.PodcastWhereUniqueInput[]
+  update?: Prisma.PodcastUpdateWithWhereUniqueWithoutEmissionInput | Prisma.PodcastUpdateWithWhereUniqueWithoutEmissionInput[]
+  updateMany?: Prisma.PodcastUpdateManyWithWhereWithoutEmissionInput | Prisma.PodcastUpdateManyWithWhereWithoutEmissionInput[]
+  deleteMany?: Prisma.PodcastScalarWhereInput | Prisma.PodcastScalarWhereInput[]
+}
+
 export type PodcastCreateNestedOneWithoutTagsInput = {
   create?: Prisma.XOR<Prisma.PodcastCreateWithoutTagsInput, Prisma.PodcastUncheckedCreateWithoutTagsInput>
   connectOrCreate?: Prisma.PodcastCreateOrConnectWithoutTagsInput
@@ -870,6 +958,7 @@ export type PodcastCreateWithoutAuthorInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -882,6 +971,7 @@ export type PodcastCreateWithoutAuthorInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutPodcastsInput
+  emission?: Prisma.EmissionCreateNestedOneWithoutPodcastsInput
   tags?: Prisma.PodcastTagCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentCreateNestedManyWithoutPodcastInput
@@ -894,6 +984,7 @@ export type PodcastUncheckedCreateWithoutAuthorInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -906,6 +997,7 @@ export type PodcastUncheckedCreateWithoutAuthorInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categoryId?: string | null
+  emissionId?: string | null
   tags?: Prisma.PodcastTagUncheckedCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPodcastInput
@@ -947,6 +1039,7 @@ export type PodcastScalarWhereInput = {
   slug?: Prisma.StringFilter<"Podcast"> | string
   description?: Prisma.StringNullableFilter<"Podcast"> | string | null
   audioUrl?: Prisma.StringFilter<"Podcast"> | string
+  mediaType?: Prisma.StringFilter<"Podcast"> | string
   coverImage?: Prisma.StringNullableFilter<"Podcast"> | string | null
   duration?: Prisma.IntFilter<"Podcast"> | number
   transcript?: Prisma.StringNullableFilter<"Podcast"> | string | null
@@ -960,6 +1053,7 @@ export type PodcastScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Podcast"> | Date | string
   authorId?: Prisma.StringFilter<"Podcast"> | string
   categoryId?: Prisma.StringNullableFilter<"Podcast"> | string | null
+  emissionId?: Prisma.StringNullableFilter<"Podcast"> | string | null
 }
 
 export type PodcastCreateWithoutCategoryInput = {
@@ -968,6 +1062,7 @@ export type PodcastCreateWithoutCategoryInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -980,6 +1075,7 @@ export type PodcastCreateWithoutCategoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutPodcastsInput
+  emission?: Prisma.EmissionCreateNestedOneWithoutPodcastsInput
   tags?: Prisma.PodcastTagCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentCreateNestedManyWithoutPodcastInput
@@ -992,6 +1088,7 @@ export type PodcastUncheckedCreateWithoutCategoryInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1004,6 +1101,7 @@ export type PodcastUncheckedCreateWithoutCategoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authorId: string
+  emissionId?: string | null
   tags?: Prisma.PodcastTagUncheckedCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPodcastInput
@@ -1036,12 +1134,13 @@ export type PodcastUpdateManyWithWhereWithoutCategoryInput = {
   data: Prisma.XOR<Prisma.PodcastUpdateManyMutationInput, Prisma.PodcastUncheckedUpdateManyWithoutCategoryInput>
 }
 
-export type PodcastCreateWithoutTagsInput = {
+export type PodcastCreateWithoutEmissionInput = {
   id?: string
   title: string
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1055,17 +1154,19 @@ export type PodcastCreateWithoutTagsInput = {
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutPodcastsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPodcastsInput
+  tags?: Prisma.PodcastTagCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentCreateNestedManyWithoutPodcastInput
   bookmarks?: Prisma.BookmarkCreateNestedManyWithoutPodcastInput
 }
 
-export type PodcastUncheckedCreateWithoutTagsInput = {
+export type PodcastUncheckedCreateWithoutEmissionInput = {
   id?: string
   title: string
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1079,6 +1180,85 @@ export type PodcastUncheckedCreateWithoutTagsInput = {
   updatedAt?: Date | string
   authorId: string
   categoryId?: string | null
+  tags?: Prisma.PodcastTagUncheckedCreateNestedManyWithoutPodcastInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPodcastInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPodcastInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPodcastInput
+}
+
+export type PodcastCreateOrConnectWithoutEmissionInput = {
+  where: Prisma.PodcastWhereUniqueInput
+  create: Prisma.XOR<Prisma.PodcastCreateWithoutEmissionInput, Prisma.PodcastUncheckedCreateWithoutEmissionInput>
+}
+
+export type PodcastCreateManyEmissionInputEnvelope = {
+  data: Prisma.PodcastCreateManyEmissionInput | Prisma.PodcastCreateManyEmissionInput[]
+  skipDuplicates?: boolean
+}
+
+export type PodcastUpsertWithWhereUniqueWithoutEmissionInput = {
+  where: Prisma.PodcastWhereUniqueInput
+  update: Prisma.XOR<Prisma.PodcastUpdateWithoutEmissionInput, Prisma.PodcastUncheckedUpdateWithoutEmissionInput>
+  create: Prisma.XOR<Prisma.PodcastCreateWithoutEmissionInput, Prisma.PodcastUncheckedCreateWithoutEmissionInput>
+}
+
+export type PodcastUpdateWithWhereUniqueWithoutEmissionInput = {
+  where: Prisma.PodcastWhereUniqueInput
+  data: Prisma.XOR<Prisma.PodcastUpdateWithoutEmissionInput, Prisma.PodcastUncheckedUpdateWithoutEmissionInput>
+}
+
+export type PodcastUpdateManyWithWhereWithoutEmissionInput = {
+  where: Prisma.PodcastScalarWhereInput
+  data: Prisma.XOR<Prisma.PodcastUpdateManyMutationInput, Prisma.PodcastUncheckedUpdateManyWithoutEmissionInput>
+}
+
+export type PodcastCreateWithoutTagsInput = {
+  id?: string
+  title: string
+  slug: string
+  description?: string | null
+  audioUrl: string
+  mediaType?: string
+  coverImage?: string | null
+  duration: number
+  transcript?: string | null
+  publishedAt?: Date | string | null
+  status?: $Enums.PostStatus
+  plays?: number
+  likesCount?: number
+  commentsCount?: number
+  bookmarksCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  author: Prisma.UserCreateNestedOneWithoutPodcastsInput
+  category?: Prisma.CategoryCreateNestedOneWithoutPodcastsInput
+  emission?: Prisma.EmissionCreateNestedOneWithoutPodcastsInput
+  likes?: Prisma.LikeCreateNestedManyWithoutPodcastInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPodcastInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutPodcastInput
+}
+
+export type PodcastUncheckedCreateWithoutTagsInput = {
+  id?: string
+  title: string
+  slug: string
+  description?: string | null
+  audioUrl: string
+  mediaType?: string
+  coverImage?: string | null
+  duration: number
+  transcript?: string | null
+  publishedAt?: Date | string | null
+  status?: $Enums.PostStatus
+  plays?: number
+  likesCount?: number
+  commentsCount?: number
+  bookmarksCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  authorId: string
+  categoryId?: string | null
+  emissionId?: string | null
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPodcastInput
   bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPodcastInput
@@ -1106,6 +1286,7 @@ export type PodcastUpdateWithoutTagsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1119,6 +1300,7 @@ export type PodcastUpdateWithoutTagsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutPodcastsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPodcastsNestedInput
+  emission?: Prisma.EmissionUpdateOneWithoutPodcastsNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPodcastNestedInput
   bookmarks?: Prisma.BookmarkUpdateManyWithoutPodcastNestedInput
@@ -1130,6 +1312,7 @@ export type PodcastUncheckedUpdateWithoutTagsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1143,6 +1326,7 @@ export type PodcastUncheckedUpdateWithoutTagsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPodcastNestedInput
   bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPodcastNestedInput
@@ -1154,6 +1338,7 @@ export type PodcastCreateWithoutCommentsInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1167,6 +1352,7 @@ export type PodcastCreateWithoutCommentsInput = {
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutPodcastsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPodcastsInput
+  emission?: Prisma.EmissionCreateNestedOneWithoutPodcastsInput
   tags?: Prisma.PodcastTagCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeCreateNestedManyWithoutPodcastInput
   bookmarks?: Prisma.BookmarkCreateNestedManyWithoutPodcastInput
@@ -1178,6 +1364,7 @@ export type PodcastUncheckedCreateWithoutCommentsInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1191,6 +1378,7 @@ export type PodcastUncheckedCreateWithoutCommentsInput = {
   updatedAt?: Date | string
   authorId: string
   categoryId?: string | null
+  emissionId?: string | null
   tags?: Prisma.PodcastTagUncheckedCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPodcastInput
   bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPodcastInput
@@ -1218,6 +1406,7 @@ export type PodcastUpdateWithoutCommentsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1231,6 +1420,7 @@ export type PodcastUpdateWithoutCommentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutPodcastsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPodcastsNestedInput
+  emission?: Prisma.EmissionUpdateOneWithoutPodcastsNestedInput
   tags?: Prisma.PodcastTagUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPodcastNestedInput
   bookmarks?: Prisma.BookmarkUpdateManyWithoutPodcastNestedInput
@@ -1242,6 +1432,7 @@ export type PodcastUncheckedUpdateWithoutCommentsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1255,6 +1446,7 @@ export type PodcastUncheckedUpdateWithoutCommentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.PodcastTagUncheckedUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPodcastNestedInput
   bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPodcastNestedInput
@@ -1266,6 +1458,7 @@ export type PodcastCreateWithoutLikesInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1279,6 +1472,7 @@ export type PodcastCreateWithoutLikesInput = {
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutPodcastsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPodcastsInput
+  emission?: Prisma.EmissionCreateNestedOneWithoutPodcastsInput
   tags?: Prisma.PodcastTagCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentCreateNestedManyWithoutPodcastInput
   bookmarks?: Prisma.BookmarkCreateNestedManyWithoutPodcastInput
@@ -1290,6 +1484,7 @@ export type PodcastUncheckedCreateWithoutLikesInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1303,6 +1498,7 @@ export type PodcastUncheckedCreateWithoutLikesInput = {
   updatedAt?: Date | string
   authorId: string
   categoryId?: string | null
+  emissionId?: string | null
   tags?: Prisma.PodcastTagUncheckedCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPodcastInput
   bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutPodcastInput
@@ -1330,6 +1526,7 @@ export type PodcastUpdateWithoutLikesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1343,6 +1540,7 @@ export type PodcastUpdateWithoutLikesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutPodcastsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPodcastsNestedInput
+  emission?: Prisma.EmissionUpdateOneWithoutPodcastsNestedInput
   tags?: Prisma.PodcastTagUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPodcastNestedInput
   bookmarks?: Prisma.BookmarkUpdateManyWithoutPodcastNestedInput
@@ -1354,6 +1552,7 @@ export type PodcastUncheckedUpdateWithoutLikesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1367,6 +1566,7 @@ export type PodcastUncheckedUpdateWithoutLikesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.PodcastTagUncheckedUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPodcastNestedInput
   bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPodcastNestedInput
@@ -1378,6 +1578,7 @@ export type PodcastCreateWithoutBookmarksInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1391,6 +1592,7 @@ export type PodcastCreateWithoutBookmarksInput = {
   updatedAt?: Date | string
   author: Prisma.UserCreateNestedOneWithoutPodcastsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPodcastsInput
+  emission?: Prisma.EmissionCreateNestedOneWithoutPodcastsInput
   tags?: Prisma.PodcastTagCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentCreateNestedManyWithoutPodcastInput
@@ -1402,6 +1604,7 @@ export type PodcastUncheckedCreateWithoutBookmarksInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1415,6 +1618,7 @@ export type PodcastUncheckedCreateWithoutBookmarksInput = {
   updatedAt?: Date | string
   authorId: string
   categoryId?: string | null
+  emissionId?: string | null
   tags?: Prisma.PodcastTagUncheckedCreateNestedManyWithoutPodcastInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPodcastInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPodcastInput
@@ -1442,6 +1646,7 @@ export type PodcastUpdateWithoutBookmarksInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1455,6 +1660,7 @@ export type PodcastUpdateWithoutBookmarksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutPodcastsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPodcastsNestedInput
+  emission?: Prisma.EmissionUpdateOneWithoutPodcastsNestedInput
   tags?: Prisma.PodcastTagUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPodcastNestedInput
@@ -1466,6 +1672,7 @@ export type PodcastUncheckedUpdateWithoutBookmarksInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1479,6 +1686,7 @@ export type PodcastUncheckedUpdateWithoutBookmarksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.PodcastTagUncheckedUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPodcastNestedInput
@@ -1490,6 +1698,7 @@ export type PodcastCreateManyAuthorInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1502,6 +1711,7 @@ export type PodcastCreateManyAuthorInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categoryId?: string | null
+  emissionId?: string | null
 }
 
 export type PodcastUpdateWithoutAuthorInput = {
@@ -1510,6 +1720,7 @@ export type PodcastUpdateWithoutAuthorInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1522,6 +1733,7 @@ export type PodcastUpdateWithoutAuthorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutPodcastsNestedInput
+  emission?: Prisma.EmissionUpdateOneWithoutPodcastsNestedInput
   tags?: Prisma.PodcastTagUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPodcastNestedInput
@@ -1534,6 +1746,7 @@ export type PodcastUncheckedUpdateWithoutAuthorInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1546,6 +1759,7 @@ export type PodcastUncheckedUpdateWithoutAuthorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.PodcastTagUncheckedUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPodcastNestedInput
@@ -1558,6 +1772,7 @@ export type PodcastUncheckedUpdateManyWithoutAuthorInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1570,6 +1785,7 @@ export type PodcastUncheckedUpdateManyWithoutAuthorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PodcastCreateManyCategoryInput = {
@@ -1578,6 +1794,7 @@ export type PodcastCreateManyCategoryInput = {
   slug: string
   description?: string | null
   audioUrl: string
+  mediaType?: string
   coverImage?: string | null
   duration: number
   transcript?: string | null
@@ -1590,6 +1807,7 @@ export type PodcastCreateManyCategoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   authorId: string
+  emissionId?: string | null
 }
 
 export type PodcastUpdateWithoutCategoryInput = {
@@ -1598,6 +1816,7 @@ export type PodcastUpdateWithoutCategoryInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1610,6 +1829,7 @@ export type PodcastUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   author?: Prisma.UserUpdateOneRequiredWithoutPodcastsNestedInput
+  emission?: Prisma.EmissionUpdateOneWithoutPodcastsNestedInput
   tags?: Prisma.PodcastTagUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPodcastNestedInput
@@ -1622,6 +1842,7 @@ export type PodcastUncheckedUpdateWithoutCategoryInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1634,6 +1855,7 @@ export type PodcastUncheckedUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.PodcastTagUncheckedUpdateManyWithoutPodcastNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPodcastNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPodcastNestedInput
@@ -1646,6 +1868,7 @@ export type PodcastUncheckedUpdateManyWithoutCategoryInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1658,6 +1881,103 @@ export type PodcastUncheckedUpdateManyWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  emissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type PodcastCreateManyEmissionInput = {
+  id?: string
+  title: string
+  slug: string
+  description?: string | null
+  audioUrl: string
+  mediaType?: string
+  coverImage?: string | null
+  duration: number
+  transcript?: string | null
+  publishedAt?: Date | string | null
+  status?: $Enums.PostStatus
+  plays?: number
+  likesCount?: number
+  commentsCount?: number
+  bookmarksCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  authorId: string
+  categoryId?: string | null
+}
+
+export type PodcastUpdateWithoutEmissionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
+  plays?: Prisma.IntFieldUpdateOperationsInput | number
+  likesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  commentsCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bookmarksCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  author?: Prisma.UserUpdateOneRequiredWithoutPodcastsNestedInput
+  category?: Prisma.CategoryUpdateOneWithoutPodcastsNestedInput
+  tags?: Prisma.PodcastTagUpdateManyWithoutPodcastNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutPodcastNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPodcastNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutPodcastNestedInput
+}
+
+export type PodcastUncheckedUpdateWithoutEmissionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
+  plays?: Prisma.IntFieldUpdateOperationsInput | number
+  likesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  commentsCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bookmarksCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.PodcastTagUncheckedUpdateManyWithoutPodcastNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutPodcastNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPodcastNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutPodcastNestedInput
+}
+
+export type PodcastUncheckedUpdateManyWithoutEmissionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  audioUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  mediaType?: Prisma.StringFieldUpdateOperationsInput | string
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
+  plays?: Prisma.IntFieldUpdateOperationsInput | number
+  likesCount?: Prisma.IntFieldUpdateOperationsInput | number
+  commentsCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bookmarksCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1724,6 +2044,7 @@ export type PodcastSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   slug?: boolean
   description?: boolean
   audioUrl?: boolean
+  mediaType?: boolean
   coverImage?: boolean
   duration?: boolean
   transcript?: boolean
@@ -1737,8 +2058,10 @@ export type PodcastSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   updatedAt?: boolean
   authorId?: boolean
   categoryId?: boolean
+  emissionId?: boolean
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   category?: boolean | Prisma.Podcast$categoryArgs<ExtArgs>
+  emission?: boolean | Prisma.Podcast$emissionArgs<ExtArgs>
   tags?: boolean | Prisma.Podcast$tagsArgs<ExtArgs>
   likes?: boolean | Prisma.Podcast$likesArgs<ExtArgs>
   comments?: boolean | Prisma.Podcast$commentsArgs<ExtArgs>
@@ -1754,6 +2077,7 @@ export type PodcastSelectScalar = {
   slug?: boolean
   description?: boolean
   audioUrl?: boolean
+  mediaType?: boolean
   coverImage?: boolean
   duration?: boolean
   transcript?: boolean
@@ -1767,12 +2091,14 @@ export type PodcastSelectScalar = {
   updatedAt?: boolean
   authorId?: boolean
   categoryId?: boolean
+  emissionId?: boolean
 }
 
-export type PodcastOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "audioUrl" | "coverImage" | "duration" | "transcript" | "publishedAt" | "status" | "plays" | "likesCount" | "commentsCount" | "bookmarksCount" | "createdAt" | "updatedAt" | "authorId" | "categoryId", ExtArgs["result"]["podcast"]>
+export type PodcastOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "audioUrl" | "mediaType" | "coverImage" | "duration" | "transcript" | "publishedAt" | "status" | "plays" | "likesCount" | "commentsCount" | "bookmarksCount" | "createdAt" | "updatedAt" | "authorId" | "categoryId" | "emissionId", ExtArgs["result"]["podcast"]>
 export type PodcastInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   category?: boolean | Prisma.Podcast$categoryArgs<ExtArgs>
+  emission?: boolean | Prisma.Podcast$emissionArgs<ExtArgs>
   tags?: boolean | Prisma.Podcast$tagsArgs<ExtArgs>
   likes?: boolean | Prisma.Podcast$likesArgs<ExtArgs>
   comments?: boolean | Prisma.Podcast$commentsArgs<ExtArgs>
@@ -1785,6 +2111,7 @@ export type $PodcastPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     author: Prisma.$UserPayload<ExtArgs>
     category: Prisma.$CategoryPayload<ExtArgs> | null
+    emission: Prisma.$EmissionPayload<ExtArgs> | null
     tags: Prisma.$PodcastTagPayload<ExtArgs>[]
     likes: Prisma.$LikePayload<ExtArgs>[]
     comments: Prisma.$CommentPayload<ExtArgs>[]
@@ -1796,6 +2123,7 @@ export type $PodcastPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     slug: string
     description: string | null
     audioUrl: string
+    mediaType: string
     coverImage: string | null
     duration: number
     transcript: string | null
@@ -1809,6 +2137,7 @@ export type $PodcastPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     updatedAt: Date
     authorId: string
     categoryId: string | null
+    emissionId: string | null
   }, ExtArgs["result"]["podcast"]>
   composites: {}
 }
@@ -2151,6 +2480,7 @@ export interface Prisma__PodcastClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   author<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   category<T extends Prisma.Podcast$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Podcast$categoryArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  emission<T extends Prisma.Podcast$emissionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Podcast$emissionArgs<ExtArgs>>): Prisma.Prisma__EmissionClient<runtime.Types.Result.GetResult<Prisma.$EmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   tags<T extends Prisma.Podcast$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Podcast$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PodcastTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   likes<T extends Prisma.Podcast$likesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Podcast$likesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Podcast$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Podcast$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2189,6 +2519,7 @@ export interface PodcastFieldRefs {
   readonly slug: Prisma.FieldRef<"Podcast", 'String'>
   readonly description: Prisma.FieldRef<"Podcast", 'String'>
   readonly audioUrl: Prisma.FieldRef<"Podcast", 'String'>
+  readonly mediaType: Prisma.FieldRef<"Podcast", 'String'>
   readonly coverImage: Prisma.FieldRef<"Podcast", 'String'>
   readonly duration: Prisma.FieldRef<"Podcast", 'Int'>
   readonly transcript: Prisma.FieldRef<"Podcast", 'String'>
@@ -2202,6 +2533,7 @@ export interface PodcastFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"Podcast", 'DateTime'>
   readonly authorId: Prisma.FieldRef<"Podcast", 'String'>
   readonly categoryId: Prisma.FieldRef<"Podcast", 'String'>
+  readonly emissionId: Prisma.FieldRef<"Podcast", 'String'>
 }
     
 
@@ -2566,6 +2898,25 @@ export type Podcast$categoryArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.CategoryInclude<ExtArgs> | null
   where?: Prisma.CategoryWhereInput
+}
+
+/**
+ * Podcast.emission
+ */
+export type Podcast$emissionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Emission
+   */
+  select?: Prisma.EmissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Emission
+   */
+  omit?: Prisma.EmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmissionInclude<ExtArgs> | null
+  where?: Prisma.EmissionWhereInput
 }
 
 /**

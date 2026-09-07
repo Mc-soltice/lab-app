@@ -1,7 +1,7 @@
 // app/post/enregistrement/page.tsx
 "use client";
 
-import Card from "@/components/ui/Card";
+import ArticleCard from "@/components/ui/ArticleCard";
 import { useSavedPosts } from "@/hooks/blog/post/useSavedPosts";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -30,7 +30,7 @@ export default function SavedPostsPage() {
       <div className="max-w-7xl mx-auto py-8 px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <Card key={i} isLoading />
+            <ArticleCard key={i} isLoading />
           ))}
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function SavedPostsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: Math.min(index * 0.05, 0.5) }}
             >
-              <Card post={item} />
+              <ArticleCard post={item} />
             </motion.div>
           ))}
         </div>

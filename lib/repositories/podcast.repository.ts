@@ -40,6 +40,7 @@ export class PodcastRepository {
       include: {
         author: { select: AUTHOR_SELECT },
         category: { select: { id: true, name: true, slug: true } },
+        emission: { select: { id: true, title: true, slug: true } },
         tags: {
           include: { tag: { select: { id: true, name: true, slug: true } } },
         },
@@ -98,6 +99,7 @@ export class PodcastRepository {
         include: {
           author: { select: AUTHOR_SELECT },
           category: { select: { id: true, name: true, slug: true } },
+          emission: { select: { id: true, title: true, slug: true } },
         },
       }),
       this.db.podcast.count({ where }),
@@ -114,10 +116,7 @@ export class PodcastRepository {
     const skip = (page - 1) * limit;
     const where: Prisma.PodcastWhereInput = {
       status: "PUBLISHED",
-      OR: [
-        { title: { contains: query } },
-        { description: { contains: query } },
-      ],
+      OR: [{ title: { contains: query } }, { description: { contains: query } }],
     };
     const [data, total] = await Promise.all([
       this.db.podcast.findMany({

@@ -1,4 +1,5 @@
 import LayoutShell from "@/components/Shell/LayoutShell";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export default function PublicLayout({
   children,
@@ -6,8 +7,10 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <LayoutShell showHeader={true} showSidebar={true}>
-      {children}
-    </LayoutShell>
+    <ProtectedRoute fallback={<div className="min-h-screen" />}>
+      <LayoutShell showHeader={true} showSidebar={true}>
+        {children}
+      </LayoutShell>
+    </ProtectedRoute>
   );
 }

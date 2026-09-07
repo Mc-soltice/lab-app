@@ -54,9 +54,7 @@ export interface ArticleViewProps {
   handleCommentFormSubmit: (e: React.FormEvent) => void;
   setActiveView: (view: "feed" | "article" | "author" | "admin") => void;
   setSelectedAuthorId: (id: string | null) => void;
-  setAdminTab?: (
-    tab: "dashboard" | "articles" | "comments" | "activities",
-  ) => void;
+  setAdminTab?: (tab: "dashboard" | "articles" | "comments" | "activities") => void;
 }
 
 export default function ArticleView({
@@ -83,11 +81,32 @@ export default function ArticleView({
     <motion.div
       id="article-reader-root"
       key="article-detail"
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      className="max-w-4xl mx-auto flex flex-col gap-5 w-full"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="max-w-4xl mx-auto flex flex-col gap-6 w-full"
+      style={
+        {
+          "--ra-paper": "#F4EEDF",
+          "--ra-paper-alt": "#ECE3CC",
+          "--ra-ink": "#22281F",
+          "--ra-ink-soft": "#5B5A46",
+          "--ra-green": "#204331",
+          "--ra-amber": "#B07B2C",
+          "--ra-bordeaux": "#7C2B32",
+          "--ra-rule": "#D9CDA8",
+          "--ra-rule-strong": "#A8946A",
+        } as React.CSSProperties
+      }
     >
+      {/* Typographie du registre — scopée à cette vue */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+        #article-reader-root .font-serif { font-family: 'IBM Plex Serif', Georgia, serif; }
+        #article-reader-root .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+      `}</style>
+
       <ArticleHeader
         activePost={activePost}
         setActiveView={setActiveView}

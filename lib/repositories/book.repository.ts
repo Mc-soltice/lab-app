@@ -31,12 +31,6 @@ export class BookRepository {
       include: {
         author: { select: AUTHOR_SELECT },
         category: { select: { id: true, name: true, slug: true } },
-        // Principe 5 : jamais "tout" -> la liste des chapitres ne renvoie pas leur `content`
-        chapters: {
-          where: { publishedAt: { not: null } },
-          orderBy: { order: "asc" },
-          select: { id: true, title: true, order: true, publishedAt: true },
-        },
       },
     });
   }
@@ -71,7 +65,9 @@ export class BookRepository {
     });
   }
 
-  async getStats(id: string): Promise<{ likes: number; comments: number; bookmarks: number }> {
+  async getStats(
+    id: string,
+  ): Promise<{ likes: number; comments: number; bookmarks: number }> {
     const book = await this.db.book.findUnique({
       where: { id },
       select: {
@@ -92,7 +88,6 @@ export class BookRepository {
     return {
       isLiked: false,
       isBookmarked: false,
-      isFollowing: false,
     };
   }
 
@@ -152,20 +147,6 @@ export class BookRepository {
 
   async delete(id: string): Promise<Book> {
     return this.db.book.delete({ where: { id } });
-  }
-
-  async incrementChaptersCount(id: string): Promise<void> {
-    await this.db.book.update({
-      where: { id },
-      data: { chaptersCount: { increment: 1 } },
-    });
-  }
-
-  async incrementViews(id: string): Promise<void> {
-    await this.db.book.update({
-      where: { id },
-      data: { views: { increment: 1 } },
-    });
   }
 
   async incrementLikes(id: string): Promise<void> {

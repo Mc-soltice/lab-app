@@ -11,6 +11,9 @@ interface OptimizedImageProps {
   className?: string;
   width?: number;
   height?: number;
+  priority?: boolean;
+  placeholder?: "blur" | "empty";
+  blurDataURL?: string;
 }
 
 export default function OptimizedImage({
@@ -20,6 +23,9 @@ export default function OptimizedImage({
   className = "",
   width,
   height,
+  priority = false,
+  placeholder = "empty",
+  blurDataURL,
 }: OptimizedImageProps) {
   const [error, setError] = useState(false);
 
@@ -36,6 +42,7 @@ export default function OptimizedImage({
           width={!fill ? width : undefined}
           height={!fill ? height : undefined}
           className="object-cover"
+          priority={priority}
         />
       </div>
     );
@@ -50,13 +57,26 @@ export default function OptimizedImage({
       height={!fill ? height : undefined}
       className={`object-cover ${className}`}
       onError={() => setError(true)}
-      loading="lazy"
+      loading={priority ? "eager" : "lazy"}
+      priority={priority}
+      placeholder={placeholder}
+      blurDataURL={
+        placeholder === "blur"
+          ? blurDataURL || "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDA=="
+          : undefined
+      }
       // Ajouter un timeout pour les images
       onLoadingComplete={(result) => {
         if (result.naturalWidth === 0) {
           setError(true);
         }
       }}
+      // Optimisation pour les formats modernes
+      sizes={
+        fill
+          ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          : undefined
+      }
     />
   );
 }

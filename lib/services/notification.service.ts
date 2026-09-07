@@ -39,15 +39,6 @@ export class NotificationService {
     });
   }
 
-  async notifyFollow(recipientId: string, actorId: string): Promise<void> {
-    await this.notificationRepository.create({
-      type: NotificationType.FOLLOW,
-      message: "a commencé à vous suivre",
-      user: { connect: { id: recipientId } },
-      actorId,
-    });
-  }
-
   async getUserNotifications(userId: string, page = 1, limit = 20) {
     return this.notificationRepository.findByUser(userId, page, limit);
   }

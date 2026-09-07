@@ -228,22 +228,9 @@ CREATE TABLE `bookmarks` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `follows` (
-    `id` VARCHAR(191) NOT NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `follower_id` VARCHAR(191) NOT NULL,
-    `following_id` VARCHAR(191) NOT NULL,
-
-    INDEX `follows_follower_id_idx`(`follower_id`),
-    INDEX `follows_following_id_idx`(`following_id`),
-    UNIQUE INDEX `follows_follower_id_following_id_key`(`follower_id`, `following_id`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `notifications` (
     `id` VARCHAR(191) NOT NULL,
-    `type` ENUM('LIKE', 'COMMENT', 'FOLLOW', 'SHARE') NOT NULL,
+    `type` ENUM('LIKE', 'COMMENT', 'SHARE') NOT NULL,
     `message` TEXT NOT NULL,
     `read` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -339,12 +326,6 @@ ALTER TABLE `bookmarks` ADD CONSTRAINT `bookmarks_podcast_id_fkey` FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE `bookmarks` ADD CONSTRAINT `bookmarks_book_id_fkey` FOREIGN KEY (`book_id`) REFERENCES `books`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `follows` ADD CONSTRAINT `follows_follower_id_fkey` FOREIGN KEY (`follower_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `follows` ADD CONSTRAINT `follows_following_id_fkey` FOREIGN KEY (`following_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

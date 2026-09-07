@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { getSession, signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, {
   createContext,
@@ -63,8 +63,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           throw new Error(res.error);
         }
 
-        toast.success("Connexion réussie");
-        router.push("/home");
+        // Récupérer la session à jour et rediriger selon le rôle
+        const currentSession = await getSession();
+        const role = currentSession?.user?.role;
+
+        if (role === "ADMIN" || role === "GESTIONNAIRE") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/post");
+        }
         router.refresh();
       } catch (error) {
         console.error("Login error:", error);

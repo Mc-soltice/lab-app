@@ -15,6 +15,7 @@ interface TagInputProps {
   disabled?: boolean;
   isCreating?: boolean;
   maxTags?: number;
+  error?: string;
 }
 
 export default function TagInput({
@@ -28,42 +29,38 @@ export default function TagInput({
   disabled = false,
   isCreating = false,
   maxTags,
+  error,
 }: TagInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const hasValue = items.length > 0 || search.length > 0;
   const isMaxReached = maxTags ? items.length >= maxTags : false;
+  const trimmedSearch = search.trim();
 
-  // Liste filtrée selon la recherche, en excluant ce qui est déjà sélectionné
+  // Filtrage
   const filteredItems = useMemo(
     () =>
       availableItems.filter(
         (item) =>
           !items.includes(item) &&
-          item.toLowerCase().includes(search.trim().toLowerCase()),
+          item.toLowerCase().includes(trimmedSearch.toLowerCase())
       ),
-    [availableItems, items, search],
+    [availableItems, items, trimmedSearch]
   );
 
-  // On ne propose "Créer" que si la recherche n'est pas vide et ne matche
-  // pas déjà exactement un élément existant (insensible à la casse)
-  const trimmedSearch = search.trim();
   const canCreate =
     !isMaxReached &&
     trimmedSearch.length > 0 &&
     !availableItems.some(
-      (item) => item.toLowerCase() === trimmedSearch.toLowerCase(),
+      (item) => item.toLowerCase() === trimmedSearch.toLowerCase()
     ) &&
     !items.some((item) => item.toLowerCase() === trimmedSearch.toLowerCase());
 
-  // Liste combinée affichée dans le dropdown : résultats filtrés + option "créer"
   const options = useMemo(
     () => [
       ...filteredItems.map((item) => ({
@@ -72,35 +69,31 @@ export default function TagInput({
       })),
       ...(canCreate ? [{ type: "create" as const, value: trimmedSearch }] : []),
     ],
-    [filteredItems, canCreate, trimmedSearch],
+    [filteredItems, canCreate, trimmedSearch]
   );
 
-  // Réinitialiser l'index actif quand la liste change
+  // Reset active index
   useEffect(() => {
     setActiveIndex(0);
-  }, [search, isOpen, options.length]);
+  }, [search, options.length]);
 
-  // Gestion du clic en dehors
+  // Click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
-        setIsFocused(false);
         setIsOpen(false);
         setSearch("");
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Gestion de l'ajout d'un item
+  // Ajout
   const handleAddItem = async (item: string) => {
     const value = item.trim();
 
@@ -120,8 +113,6 @@ export default function TagInput({
       setSearch("");
       setIsOpen(false);
       inputRef.current?.focus();
-    } catch (error) {
-      console.error("Erreur lors de l'ajout:", error);
     } finally {
       setIsAdding(false);
     }
@@ -130,23 +121,10 @@ export default function TagInput({
   const handleSelectOption = async (item: string) => {
     const value = item.trim();
     if (!value || disabled || isMaxReached || isAdding) return;
-
-    if (
-      availableItems.some(
-        (option) => option.toLowerCase() === value.toLowerCase(),
-      )
-    ) {
-      await onAdd(value);
-      setSearch("");
-      setIsOpen(false);
-      inputRef.current?.focus();
-      return;
-    }
-
     await handleAddItem(value);
   };
 
-  // Gestion des touches du clavier
+  // Clavier
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled || isMaxReached) return;
 
@@ -166,13 +144,12 @@ export default function TagInput({
         return;
       }
       setActiveIndex(
-        (prev) => (prev - 1 + options.length) % Math.max(options.length, 1),
+        (prev) => (prev - 1 + options.length) % Math.max(options.length, 1)
       );
     }
 
     if (e.key === "Enter") {
       e.preventDefault();
-
       if (isOpen && options.length > 0) {
         handleAddItem(options[activeIndex].value);
       } else if (trimmedSearch) {
@@ -181,7 +158,6 @@ export default function TagInput({
     }
 
     if (e.key === "Backspace" && !search && items.length > 0) {
-      // Supprime le dernier tag si l'input est vide
       onRemove(items[items.length - 1]);
     }
 
@@ -194,11 +170,9 @@ export default function TagInput({
 
   const handleFocus = () => {
     if (disabled) return;
-    setIsFocused(true);
     setIsOpen(true);
   };
 
-  // Message pour la limite de tags
   const getLimitMessage = () => {
     if (isMaxReached && maxTags !== undefined) {
       return `Limite de ${maxTags} tag${maxTags > 1 ? "s" : ""} atteinte`;
@@ -209,90 +183,84 @@ export default function TagInput({
     return null;
   };
 
+  // Styles
+  const borderColor = isMaxReached
+    ? "#EAB308"
+    : error
+    ? "#EF4444"
+    : "var(--border)";
+
+  const labelColor = isMaxReached
+    ? "#EAB308"
+    : error
+    ? "#EF4444"
+    : "var(--text-tertiary)";
+
+  const tagStyles =
+    tagColor === "blue"
+      ? {
+          bg: "var(--bg-tertiary)",
+          text: "var(--accent)",
+        }
+      : {
+          bg: "var(--bg-secondary)",
+          text: "var(--text-secondary)",
+        };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div ref={containerRef} className="relative">
-        <fieldset
-          className={`relative rounded-xl border px-3 transition-all flex flex-col ${
-            disabled ? "opacity-60 cursor-not-allowed" : ""
-          } ${isMaxReached ? "border-yellow-500" : ""}`}
+        {/* Champ */}
+        <div
+          className="relative rounded-lg border transition-colors"
           style={{
-            backgroundColor: "var(--bg-secondary)",
-            borderColor: isMaxReached
-              ? "#EAB308"
-              : isFocused
-                ? "var(--accent)"
-                : "var(--border)",
-            height: "65px",
+            borderColor,
+            background: "var(--bg-secondary)",
           }}
           onClick={() => {
             if (!disabled && !isMaxReached) {
-              setIsFocused(true);
               setIsOpen(true);
               inputRef.current?.focus();
             }
           }}
         >
-          <legend
-            className="px-2 leading-none overflow-hidden shrink-0"
-            style={{ height: "12px" }}
+          {/* Label flottant */}
+          <label
+            className="absolute left-3 px-0.5 transition-all duration-200 pointer-events-none"
+            style={{
+              color: labelColor,
+              fontSize: items.length > 0 || search ? "11px" : "14px",
+              top: items.length > 0 || search ? "6px" : "50%",
+              transform: items.length > 0 || search ? "translateY(0)" : "translateY(-50%)",
+            }}
           >
-            <span
-              className="block text-[12px] transition-opacity duration-200"
-              style={{
-                color: isMaxReached
-                  ? "#EAB308"
-                  : isFocused
-                    ? "var(--accent)"
-                    : "var(--text-tertiary)",
-                opacity: isFocused || hasValue ? 1 : 0,
-              }}
-            >
-              {label} {maxTags && `(${items.length}/${maxTags})`}
-            </span>
-          </legend>
+            {label}
+            {maxTags && ` (${items.length}/${maxTags})`}
+          </label>
 
-          <div className="flex flex-wrap items-center gap-2 py-1 flex-1 overflow-y-auto min-h-0">
-            {/* Placeholder centré dans le champ */}
-            {!isFocused && !hasValue && (
-              <span
-                className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-sm transition-all"
-                style={{
-                  color: "var(--text-tertiary)",
-                }}
-              >
-                {label}
-              </span>
-            )}
-
-            {/* TAGS */}
+          {/* Contenu */}
+          <div
+            className="flex flex-wrap items-center gap-1.5 px-3 pt-5 pb-1.5"
+            style={{ minHeight: items.length > 0 ? "auto" : "52px" }}
+          >
+            {/* Tags */}
             {items.map((item) => (
               <span
                 key={item}
-                className="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full animate-in fade-in-0 zoom-in-50 duration-200"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-sm rounded-full"
                 style={{
-                  backgroundColor:
-                    tagColor === "blue"
-                      ? "var(--bg-tertiary)"
-                      : "var(--bg-secondary)",
-                  color:
-                    tagColor === "blue"
-                      ? "var(--accent)"
-                      : "var(--text-secondary)",
+                  background: tagStyles.bg,
+                  color: tagStyles.text,
                 }}
               >
-                {item}
-
+                <span className="max-w-[120px] truncate">{item}</span>
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onRemove(item);
                   }}
-                  className="transition-colors hover:opacity-70"
-                  style={{
-                    color: "var(--text-tertiary)",
-                  }}
+                  className="rounded-full p-0.5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                   disabled={disabled}
                 >
                   <X className="w-3 h-3" />
@@ -300,7 +268,7 @@ export default function TagInput({
               </span>
             ))}
 
-            {/* INPUT */}
+            {/* Input */}
             {!isMaxReached && (
               <input
                 ref={inputRef}
@@ -312,125 +280,104 @@ export default function TagInput({
                 }}
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
-                className="flex-1 min-w-25 bg-transparent outline-none text-sm py-2"
-                style={{
-                  color: "var(--text-primary)",
-                }}
-                placeholder={isFocused ? placeholder : ""}
-                role="combobox"
-                aria-expanded={isOpen}
-                aria-autocomplete="list"
+                className="flex-1 min-w-[80px] bg-transparent outline-none text-sm py-1"
+                style={{ color: "var(--text-primary)" }}
+                placeholder={isOpen ? placeholder : ""}
                 disabled={disabled}
               />
             )}
 
-            {/* Indicateur de création en cours */}
+            {/* Loading */}
             {isCreating && (
-              <div className="flex items-center gap-1 px-2">
+              <div className="flex items-center gap-1 px-1">
                 <Loader2
                   className="w-3 h-3 animate-spin"
                   style={{ color: "var(--accent)" }}
                 />
-                <span
-                  className="text-xs"
-                  style={{ color: "var(--text-tertiary)" }}
-                >
+                <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
                   Création...
                 </span>
               </div>
             )}
-          </div>
-        </fieldset>
 
-        {/* DROPDOWN */}
-        {isOpen && !disabled && (filteredItems.length > 0 || canCreate) && (
+            {/* Max reached badge */}
+            {isMaxReached && (
+              <span className="text-xs text-yellow-500 font-medium">
+                Max atteint
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Dropdown - s'ouvre par le HAUT */}
+        {isOpen && !disabled && options.length > 0 && (
           <div
-            className="absolute z-50 top-full left-0 right-0 mt-1 rounded-xl border shadow-lg max-h-48 overflow-y-auto"
+            className="absolute z-50 bottom-full left-0 right-0 mb-1 rounded-lg border shadow-lg max-h-48 overflow-y-auto"
             style={{
-              backgroundColor: "var(--bg-primary)",
+              background: "var(--bg-primary)",
               borderColor: "var(--border)",
             }}
           >
-            {filteredItems.map((item, index) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => handleSelectOption(item)}
-                onMouseEnter={() => setActiveIndex(index)}
-                className="block w-full px-4 py-2 text-left text-sm transition-colors hover:bg-opacity-80"
-                style={{
-                  color: "var(--text-primary)",
-                  backgroundColor:
-                    activeIndex === index
-                      ? "var(--bg-secondary)"
-                      : "transparent",
-                }}
-              >
-                {item}
-              </button>
-            ))}
+            {options.map((option, index) => {
+              const isActive = activeIndex === index;
+              const isCreate = option.type === "create";
 
-            {canCreate && (
-              <button
-                type="button"
-                onClick={() => handleSelectOption(trimmedSearch)}
-                onMouseEnter={() => setActiveIndex(filteredItems.length)}
-                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors border-t hover:bg-opacity-80"
-                style={{
-                  color: "var(--accent)",
-                  borderColor: "var(--border)",
-                  backgroundColor:
-                    activeIndex === filteredItems.length
-                      ? "var(--bg-secondary)"
-                      : "transparent",
-                }}
-                disabled={isAdding || isCreating}
-              >
-                {isAdding || isCreating ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
-                    <span>Création en cours...</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-3.5 h-3.5 shrink-0" />
-                    <span>Créer «&nbsp;{trimmedSearch}&nbsp;»</span>
-                  </>
-                )}
-              </button>
-            )}
+              return (
+                <button
+                  key={`${option.type}-${option.value}`}
+                  type="button"
+                  onClick={() => handleSelectOption(option.value)}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  className={`w-full px-4 py-2.5 text-left text-sm flex items-center gap-2 ${
+                    isCreate ? "border-t" : ""
+                  }`}
+                  style={{
+                    color: isCreate ? "var(--accent)" : "var(--text-primary)",
+                    background: isActive ? "var(--bg-secondary)" : "transparent",
+                    borderColor: "var(--border)",
+                  }}
+                >
+                  {isCreate ? (
+                    <>
+                      <Plus className="w-4 h-4 shrink-0" />
+                      <span>Créer "{option.value}"</span>
+                    </>
+                  ) : (
+                    <span>{option.value}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {/* État vide */}
+        {/* Empty state - s'ouvre par le HAUT */}
         {isOpen &&
           !disabled &&
           trimmedSearch.length > 0 &&
           filteredItems.length === 0 &&
           !canCreate && (
             <div
-              className="absolute z-50 top-full left-0 right-0 mt-1 rounded-xl border shadow-lg px-4 py-3 text-sm"
+              className="absolute z-50 bottom-full left-0 right-0 mb-1 rounded-lg border shadow-lg px-4 py-3 text-sm"
               style={{
-                backgroundColor: "var(--bg-primary)",
+                background: "var(--bg-primary)",
                 borderColor: "var(--border)",
                 color: "var(--text-tertiary)",
               }}
             >
-              {isMaxReached && maxTags !== undefined ? (
-                <span className="text-yellow-500">
-                  Limite de {maxTags} tag{maxTags > 1 ? "s" : ""} atteinte
-                </span>
-              ) : (
-                "Déjà sélectionné"
-              )}
+              {isMaxReached
+                ? "Limite de tags atteinte"
+                : "Ce tag est déjà sélectionné"}
             </div>
           )}
       </div>
 
-      {/* Message d'information */}
-      {getLimitMessage() && (
+      {/* Messages */}
+      {error && <p className="text-xs text-red-500">{error}</p>}
+
+      {getLimitMessage() && !error && (
         <p
-          className={`text-xs ${isMaxReached ? "text-yellow-500" : ""}`}
+          className="text-xs"
           style={{
             color: isMaxReached ? "#EAB308" : "var(--text-tertiary)",
           }}

@@ -1,8 +1,9 @@
 "use client";
 
-import FilterHeader from "@/components/ui/FilterHeader";
+import FilterHeader, { FilterToggleGroup } from "@/components/ui/FilterHeader";
 import { BookOpen } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 interface BooksPageHeaderProps {
   search: string;
@@ -20,6 +21,7 @@ export default function BooksPageHeader({
   const router = useRouter();
   const pathname = usePathname();
   const currentSearchParams = useSearchParams();
+  const [showFilters, setShowFilters] = useState(false);
 
   const updateFilters = (nextSearch: string, nextCategory: string) => {
     const params = new URLSearchParams(currentSearchParams.toString());
@@ -39,6 +41,28 @@ export default function BooksPageHeader({
     router.replace(query ? `${pathname}?${query}` : pathname);
   };
 
+  const handleToggleCategory = (categorySlug: string) => {
+    const nextCategory = category === categorySlug ? "" : categorySlug;
+    updateFilters(search, nextCategory);
+  };
+
+  const handleClearFilters = () => {
+    updateFilters("", "");
+    setShowFilters(false);
+  };
+
+  const activeFilterCount = category ? 1 : 0;
+
+  // Préparer les filtres actifs pour le résumé
+  const activeFilters = category
+    ? [
+        {
+          label: `Catégorie: ${category}`,
+          onRemove: () => handleToggleCategory(category),
+        },
+      ]
+    : [];
+
   return (
     <FilterHeader
       title="📚 Bibliothèque"
@@ -48,34 +72,31 @@ export default function BooksPageHeader({
           : "Découvrez notre collection de livres numériques"
       }
       actionLabel="Publier un livre"
-      actionHref="/book/new"
+      actionHref="/dashboard/create?type=book"
       actionIcon={<BookOpen className="h-4 w-4" />}
       searchValue={search}
       onSearchChange={(value) => updateFilters(value, category)}
       searchPlaceholder="Rechercher un livre..."
-      activeFilterCount={category ? 1 : 0}
+      showFilters={showFilters}
+      onToggleFilters={() => setShowFilters(!showFilters)}
+      activeFilterCount={activeFilterCount}
+      onClearFilters={handleClearFilters}
+      activeFilters={activeFilters}
     >
-      <div className="flex-1 min-w-37.5">
-        <label
-          className="block text-xs font-medium mb-1.5"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Catégorie
-        </label>
-        <select
-          value={category}
-          onChange={(e) => updateFilters(search, e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border text-sm transition-colors focus:outline-none"
-          style={{
-            backgroundColor: "var(--bg-primary)",
-            borderColor: "var(--border)",
-            color: "var(--text-primary)",
-          }}
-        >
-          <option value="">Toutes les catégories</option>
-          {/* Les catégories seront chargées dynamiquement */}
-        </select>
-      </div>
+      {/* Filtres avancés avec boutons cliquables */}
+      <FilterToggleGroup
+        label="Catégorie"
+        filters={[
+          { id: "fiction", label: "Fiction" },
+          { id: "non-fiction", label: "Non-fiction" },
+          { id: "science", label: "Science" },
+          { id: "technologie", label: "Technologie" },
+          { id: "histoire", label: "Histoire" },
+          { id: "biographie", label: "Biographie" },
+        ]}
+        selectedFilters={category ? [category] : []}
+        onToggleFilter={handleToggleCategory}
+      />
     </FilterHeader>
   );
 }

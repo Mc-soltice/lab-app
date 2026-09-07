@@ -153,6 +153,9 @@ export class PostRepository {
         include: {
           author: { select: AUTHOR_SELECT },
           category: { select: { id: true, name: true, slug: true } },
+          tags: {
+            include: { tag: { select: { id: true, name: true, slug: true } } },
+          },
         },
       }),
       this.db.post.count({ where }),

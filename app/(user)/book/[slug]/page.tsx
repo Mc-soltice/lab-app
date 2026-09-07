@@ -54,7 +54,6 @@ export default function BookDetailPage() {
     targetId: book?.id || "",
     targetType: "book",
     authorId: author?.id || "",
-    authorUsername: author?.username || "",
     currentUserId: user?.id,
     initialLiked: false,
     initialBookmarked: false,

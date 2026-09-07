@@ -2,24 +2,20 @@ import {
   Bell,
   Bookmark,
   BookOpen,
-  Compass,
-  Home,
   LayoutDashboard,
   Mic,
-  PlusCircle,
-  Search,
-  Settings,
-  ShieldCheck,
+  SquarePen,
   Users,
+  UserStar,
 } from "lucide-react";
 
 import type { SidebarItemType } from "./types";
 
 export const navigation: SidebarItemType[] = [
   {
-    label: "Fil d'actualité",
+    label: "Articles",
     href: "/post",
-    icon: Home,
+    icon: SquarePen,
   },
 
   {
@@ -27,30 +23,15 @@ export const navigation: SidebarItemType[] = [
     href: "/podcast",
     icon: Mic,
   },
+
   {
     label: "Livres",
     href: "/book",
     icon: BookOpen,
   },
-  {
-    label: "Search",
-    href: "/search",
-    icon: Search,
-  },
 
   {
-    label: "Create",
-    href: "/post",
-    icon: PlusCircle,
-  },
-
-  {
-    label: "Explore",
-    href: "/explore",
-    icon: Compass,
-  },
-  {
-    label: "Enregistrements",
+    label: "Mes enregistrements",
     href: "/enregistrement",
     icon: Bookmark,
   },
@@ -59,46 +40,43 @@ export const navigation: SidebarItemType[] = [
     label: "Notifications",
     href: "/notifications",
     icon: Bell,
-
-    /**
-     * Exemple badge dynamique
-     * Plus tard remplacé par API
-     */
     badge: 12,
   },
 
   {
-    label: "Dashboard",
+    label: "Administration",
     href: "/dashboard",
-    icon: LayoutDashboard,
-
-    /**
-     * Visible uniquement admin
-     */
+    icon: UserStar,
     roles: ["ADMIN"],
-
     children: [
       {
-        label: "Users",
+        label: "Dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard,
+        roles: ["ADMIN"],
+      },
+      {
+        label: "Utilisateurs",
         href: "/dashboard/users",
         icon: Users,
-
         roles: ["ADMIN"],
       },
-
       {
-        label: "Roles",
-        href: "/dashboard/roles",
-        icon: ShieldCheck,
-
+        label: "Articles",
+        href: "/dashboard/posts",
+        icon: SquarePen,
         roles: ["ADMIN"],
       },
-
       {
-        label: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-
+        label: "Podcasts",
+        href: "/dashboard/podcasts",
+        icon: Mic,
+        roles: ["ADMIN"],
+      },
+      {
+        label: "Livres",
+        href: "/dashboard/books",
+        icon: BookOpen,
         roles: ["ADMIN"],
       },
     ],

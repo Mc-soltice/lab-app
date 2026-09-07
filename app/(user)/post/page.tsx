@@ -1,9 +1,8 @@
-// app/home/page.tsx - Version avec meilleure gestion d'erreurs
-import Card from "@/components/ui/Card";
+// app/(user)/post/page.tsx
+import ArticleCard from "@/components/ui/ArticleCard";
 import PostFeedClient from "@/components/ui/PostFeedClient";
 import { getSession } from "@/lib/auth/session";
 import { FeedService } from "@/lib/services/feed.service";
-import { Suspense } from "react";
 
 interface HomePageProps {
   searchParams?: Promise<{ page?: string }>;
@@ -13,7 +12,7 @@ function LoadingFeed() {
   return (
     <div className="space-y-6">
       {[...Array(3)].map((_, i) => (
-        <Card key={i} isLoading />
+        <ArticleCard key={i} isLoading />
       ))}
     </div>
   );
@@ -66,10 +65,8 @@ export default async function Home({ searchParams }: HomePageProps) {
     }
 
     return (
-      <main className="container  px-4 py-8 ">
-        <Suspense fallback={<LoadingFeed />}>
-          <FeedContent page={page} />
-        </Suspense>
+      <main className="container mx-auto px-4 py-4">
+        <FeedContent page={page} />
       </main>
     );
   } catch (error) {

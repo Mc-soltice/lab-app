@@ -17,11 +17,12 @@ export async function PATCH(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await req.json();
     const { content } = CreateCommentSchema.parse(body);
 
     const comment = await commentService.updateComment(
-      params.id,
+      id,
       session.user.id,
       content,
     );
@@ -41,7 +42,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    await commentService.deleteComment(params.id, session.user.id);
+    const { id } = await params;
+    await commentService.deleteComment(id, session.user.id);
     return NextResponse.json({ message: "Commentaire supprimé avec succès" });
   } catch (error) {
     return handleError(error);

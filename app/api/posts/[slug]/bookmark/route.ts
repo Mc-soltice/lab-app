@@ -15,11 +15,12 @@ export async function POST(
 ) {
   try {
     const session = await getSession();
+    const { slug } = await params;
     if (!session) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const post = await postRepository.findBySlug(params.slug);
+    const post = await postRepository.findBySlug(slug);
     if (!post) throw new NotFoundException("Publication non trouvée");
 
     const bookmarked = await bookmarkService.toggleBookmark(

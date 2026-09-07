@@ -2,14 +2,7 @@
 "use client";
 
 import ProductImage from "@/components/ProductImage";
-import {
-  AlertCircle,
-  ImagePlus,
-  Link2,
-  Loader2,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { AlertCircle, ImagePlus, Link2, Loader2, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -70,9 +63,7 @@ export default function CoverImageUpload({
     const maxSizeBytes = maxSize * 1024 * 1024;
 
     if (!validTypes.includes(file.type)) {
-      setValidationError(
-        `Format non supporté. Utilisez: ${validTypes.join(", ")}`,
-      );
+      setValidationError(`Format non supporté. Utilisez: ${validTypes.join(", ")}`);
       return false;
     }
 
@@ -141,13 +132,7 @@ export default function CoverImageUpload({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <label
-          className="block text-sm font-medium tracking-wide"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Image de couverture
-        </label>
+      <div className="flex items-center justify-end mb-3">
         {(isUploading || uploadProgress > 0) && (
           <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
             {uploadProgress}%
@@ -171,8 +156,7 @@ export default function CoverImageUpload({
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               unoptimized={
-                cover_image.startsWith("data:") ||
-                cover_image.startsWith("blob:")
+                cover_image.startsWith("data:") || cover_image.startsWith("blob:")
               }
             />
 
@@ -245,9 +229,7 @@ export default function CoverImageUpload({
             {isDeleting && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50">
                 <Loader2 className="h-8 w-8 animate-spin text-white" />
-                <span className="mt-2 text-sm text-white">
-                  Suppression en cours...
-                </span>
+                <span className="mt-2 text-sm text-white">Suppression en cours...</span>
               </div>
             )}
           </div>
@@ -304,10 +286,7 @@ export default function CoverImageUpload({
                   className="h-9 w-9 animate-spin"
                   style={{ color: "var(--accent)" }}
                 />
-                <span
-                  className="text-sm"
-                  style={{ color: "var(--text-secondary)" }}
-                >
+                <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
                   Upload en cours... {uploadProgress}%
                 </span>
                 {uploadProgress < 100 && (
@@ -346,10 +325,7 @@ export default function CoverImageUpload({
                       ? "Déposez l'image ici"
                       : "Glissez une image ou cliquez pour parcourir"}
                   </span>
-                  <span
-                    className="text-xs"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
+                  <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
                     PNG, JPG, WEBP ou GIF — {maxSize} Mo maximum
                   </span>
                 </div>

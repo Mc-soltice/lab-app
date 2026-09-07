@@ -19,7 +19,8 @@ export async function POST(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const podcast = await podcastRepository.findBySlug(params.slug);
+    const { slug } = await params;
+    const podcast = await podcastRepository.findBySlug(slug);
     if (!podcast) throw new NotFoundException("Podcast non trouvé");
 
     const bookmarked = await bookmarkService.toggleBookmark(

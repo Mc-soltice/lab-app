@@ -8,17 +8,16 @@ import {
   NotFoundException,
 } from "../exceptions";
 import { CategoryRepository } from "../repositories/category.repository";
+import { EmissionRepository } from "../repositories/emission.repository";
 import { PodcastRepository } from "../repositories/podcast.repository";
 import { UserRepository } from "../repositories/user.repository";
-import {
-  CreatePodcastSchema,
-  UpdatePodcastSchema,
-} from "../validation/schemas";
+import { CreatePodcastSchema, UpdatePodcastSchema } from "../validation/schemas";
 
 export class PodcastService {
   private podcastRepository = new PodcastRepository();
   private userRepository = new UserRepository();
   private categoryRepository = new CategoryRepository();
+  private emissionRepository = new EmissionRepository();
 
   async createPodcast(
     authorId: string,
@@ -32,25 +31,29 @@ export class PodcastService {
       if (!category) throw new NotFoundException("Catégorie non trouvée");
     }
 
+    if (data.emissionId) {
+      const emission = await this.emissionRepository.findById(data.emissionId);
+      if (!emission) throw new NotFoundException("Émission non trouvée");
+    }
+
     const slug = slugify(data.title, { lower: true, strict: true });
     const existing = await this.podcastRepository.findBySlug(slug);
-    if (existing)
-      throw new ConflictException("Un podcast avec ce titre existe déjà");
+    if (existing) throw new ConflictException("Un podcast avec ce titre existe déjà");
 
     const podcastData: Prisma.PodcastCreateInput = {
       title: data.title,
       slug,
       description: data.description,
       audioUrl: data.audioUrl,
+      mediaType: data.mediaType,
       coverImage: data.coverImage,
       duration: data.duration,
       transcript: data.transcript,
       status: data.status || "DRAFT",
       publishedAt: data.status === "PUBLISHED" ? new Date() : null,
       author: { connect: { id: authorId } },
-      category: data.categoryId
-        ? { connect: { id: data.categoryId } }
-        : undefined,
+      category: data.categoryId ? { connect: { id: data.categoryId } } : undefined,
+      emission: data.emissionId ? { connect: { id: data.emissionId } } : undefined,
       tags: data.tags?.length
         ? {
             create: data.tags.map((tagId) => ({
@@ -80,23 +83,26 @@ export class PodcastService {
     const podcast = await this.podcastRepository.findById(id);
     if (!podcast) throw new NotFoundException("Podcast non trouvé");
     if (podcast.authorId !== userId) {
-      throw new ForbiddenException(
-        "Vous n'êtes pas autorisé à modifier ce podcast",
-      );
+      throw new ForbiddenException("Vous n'êtes pas autorisé à modifier ce podcast");
     }
 
     const updateData: Prisma.PodcastUpdateInput = {};
 
     if (data.title !== undefined) updateData.title = data.title;
-    if (data.description !== undefined)
-      updateData.description = data.description;
+    if (data.description !== undefined) updateData.description = data.description;
     if (data.audioUrl !== undefined) updateData.audioUrl = data.audioUrl;
+    if (data.mediaType !== undefined) updateData.mediaType = data.mediaType;
     if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
     if (data.duration !== undefined) updateData.duration = data.duration;
     if (data.transcript !== undefined) updateData.transcript = data.transcript;
     if (data.categoryId !== undefined) {
       updateData.category = data.categoryId
         ? { connect: { id: data.categoryId } }
+        : { disconnect: true };
+    }
+    if (data.emissionId !== undefined) {
+      updateData.emission = data.emissionId
+        ? { connect: { id: data.emissionId } }
         : { disconnect: true };
     }
     if (data.tags !== undefined) {
@@ -121,9 +127,7 @@ export class PodcastService {
     const podcast = await this.podcastRepository.findById(id);
     if (!podcast) throw new NotFoundException("Podcast non trouvé");
     if (podcast.authorId !== userId) {
-      throw new ForbiddenException(
-        "Vous n'êtes pas autorisé à supprimer ce podcast",
-      );
+      throw new ForbiddenException("Vous n'êtes pas autorisé à supprimer ce podcast");
     }
     await this.podcastRepository.delete(id);
   }

@@ -1,8 +1,8 @@
 "use client";
 
-import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { usePathname } from "next/navigation";
+import AdminHeader from "../AdminHeader/AdminHeader";
 
 const authPaths = ["/login", "/google-callback", "/error", "/profile"];
 
@@ -17,13 +17,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex  min-h-screen items-center justify-center p-2 sm:p-4 md:p-5">
-      <div className="flex w-full flex-col gap-2 sm:gap-4 md:flex-row xl:mx-32 2xl:mx-60">
+    <div className="min-h-screen bg-slate-100">
+      <div className="flex min-h-screen w-full flex-col md:flex-row md:items-stretch">
         <Sidebar />
 
-        <div className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
-          <Header />
-          {children}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AdminHeader />
+          <div className="min-w-0 flex-1 bg-white p-4 sm:p-6">
+            {children}
+          </div>
         </div>
       </div>
     </div>

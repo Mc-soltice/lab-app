@@ -1,29 +1,22 @@
-// app/blog/[slug]/page.tsx (version corrigée)
+// app/(user)/post/[slug]/page.tsx
 "use client";
 
-import { ArticleView } from "@/components/blog/feed/article";
-import { useAuthContext } from "@/contexts/auth/auth.context";
+import ArticleView, { UIArticlePost } from "@/components/blog/feed/article/ArticleView";
 import { usePostDetail } from "@/hooks/blog/post/usePostDetail";
-import { motion } from "framer-motion";
-import { BouncyArc } from "ldrs/react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import toast from "react-hot-toast";
+import { useCallback, useMemo, useState } from "react";
 
 export default function ArticleDetailPage() {
-  const params = useParams();
+  const params = useParams<{ slug: string }>();
   const router = useRouter();
-  const { user } = useAuthContext();
-  const slug = params.slug as string;
+  const slug = params?.slug as string;
 
-  // État local pour le formulaire de commentaire
-  const [commentAuthor, setCommentAuthor] = useState("");
-  const [commentText, setCommentText] = useState("");
+  console.log("🚀 [ArticleDetailPage] Composant monté!");
+  console.log("[ArticleDetailPage] params:", params);
+  console.log("[ArticleDetailPage] Slug extrait:", slug, "Type:", typeof slug);
 
-  // Utilisation du hook
   const {
     post,
-    author,
     comments,
     isLoading,
     isError,
@@ -31,270 +24,187 @@ export default function ArticleDetailPage() {
     isLiked,
     isBookmarked,
     likesCount,
-    isLiking,
-    isBookmarking,
     isSubmittingComment,
     toggleLike,
     toggleBookmark,
     submitComment,
-    deleteComment,
-    canInteract,
-    isOwnContent,
-    reload,
   } = usePostDetail(slug, {
     fetchComments: true,
-    commentsLimit: 20,
-    onError: (err) => {
-      console.error("Erreur dans usePostDetail:", err);
-    },
+    commentsLimit: 10,
   });
 
-  // Redirection si l'article n'existe pas
-  useEffect(() => {
-    if (!isLoading && !post && !isError) {
-      toast.error("Article non trouvé");
-      router.push("/blog");
-    }
-  }, [post, isLoading, router, isError]);
+  // États pour les commentaires UI
+  const [commentAuthor, setCommentAuthor] = useState("");
+  const [commentText, setCommentText] = useState("");
 
-  // Adaptation des données pour l'UI ArticleView
-  const adaptedPost = useMemo(() => {
+  // Mapper les données du post vers le format UI
+  const activePost: UIArticlePost | null = useMemo(() => {
     if (!post) return null;
 
-    const authorDisplayName = author
-      ? [author.firstName, author.lastName].filter(Boolean).join(" ") ||
-        author.username ||
-        author.id
-      : post.authorId || "Utilisateur";
+    const authorName = post.author
+      ? [post.author.firstName, post.author.lastName].filter(Boolean).join(" ") ||
+        post.author.username
+      : "Auteur inconnu";
 
-    const authorInitial =
-      author?.firstName?.[0] ||
-      author?.lastName?.[0] ||
-      author?.username?.[0] ||
-      post.authorId?.[0] ||
-      "U";
+    const wordsPerMinute = 200;
+    const words = post.content?.split(/\s+/).length || 0;
+    const minutes = Math.ceil(words / wordsPerMinute);
+    const readingTime = `${minutes} min de lecture`;
 
     return {
       id: post.id,
       title: post.title,
       excerpt: post.excerpt || "",
       content: post.content,
-      imageUrl: post.coverImage || "/blog/placeholder.jpg",
+      imageUrl: post.coverImage || "",
       category: post.category?.name || "Non catégorisé",
       authorId: post.authorId,
-      authorName: authorDisplayName,
-      authorRole: author?.bio || "Auteur",
-      authorAvatar:
-        author?.avatar ||
-        `https://ui-avatars.com/api/?background=6366f1&color=fff&name=${encodeURIComponent(authorInitial)}`,
-      date: new Date(post.createdAt).toLocaleDateString("fr-FR", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }),
-      readingTime: `${Math.ceil((post.content?.length || 0) / 1000)} min`,
+      authorName,
+      authorRole: post.author?.bio || "Auteur",
+      authorAvatar: post.author?.avatar || "",
+      date: post.publishedAt
+        ? new Date(post.publishedAt).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        : "",
+      readingTime,
       likesCount: likesCount,
-      tags: post.tags.map((tag) => tag.name).filter(Boolean),
+      tags: post.tags?.map((t) => t.name) || [],
     };
-  }, [post, author, likesCount]);
+  }, [post, likesCount]);
 
-  // Adaptation des commentaires pour l'UI
-  const adaptedComments = useMemo(() => {
-    if (!comments) return [];
-    return comments.map((comment) => ({
-      id: comment.id,
-      text: comment.content,
-      authorName:
-        [comment.author.firstName, comment.author.lastName]
-          .filter(Boolean)
-          .join(" ") || comment.author.username,
-      authorAvatar:
-        comment.author.avatar ||
-        `https://ui-avatars.com/api/?background=6366f1&color=fff&name=${encodeURIComponent(comment.author.username?.[0] || "U")}`,
+  // Mapper les commentaires vers le format UI
+  const uiComments = useMemo(() => {
+    return comments.map((c) => ({
+      id: c.id,
+      text: c.content,
+      authorName: c.author?.username || "Anonyme",
+      authorAvatar: c.author?.avatar || "",
       postId: post?.id || "",
       approved: true,
-      createdAt: comment.createdAt,
+      createdAt: c.createdAt,
     }));
   }, [comments, post?.id]);
 
-  // ✅ CORRECTION: Créer des tableaux typés string[] sans undefined
-  const likedPosts: string[] = useMemo(() => {
-    if (isLiked && post) {
-      return [post.id];
-    }
-    return [];
-  }, [isLiked, post]);
+  // Gestionnaires
+  const handleLikePost = useCallback(
+    async (postId: string) => {
+      await toggleLike();
+    },
+    [toggleLike],
+  );
 
-  const savedPosts: string[] = useMemo(() => {
-    if (isBookmarked && post) {
-      return [post.id];
-    }
-    return [];
-  }, [isBookmarked, post]);
+  const handleSavePost = useCallback(
+    (postId: string) => {
+      void toggleBookmark();
+    },
+    [toggleBookmark],
+  );
 
-  // Gestionnaire de soumission de commentaire
-  const handleCommentFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleToggleReaction = useCallback((postId: string, reactionId: string) => {
+    // Réactions non implémentées pour l'instant
+    console.log("Reaction:", reactionId);
+  }, []);
 
-    if (!commentText.trim()) {
-      toast.error("Le commentaire ne peut pas être vide");
-      return;
-    }
+  const handleCommentFormSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!commentText.trim()) return;
 
-    // Si l'utilisateur n'est pas connecté, utiliser le nom saisi
-    if (!canInteract) {
-      toast.error("Connectez-vous pour commenter");
-      router.push("/login");
-      return;
-    }
+      const result = await submitComment(commentText);
+      if (result) {
+        setCommentText("");
+      }
+    },
+    [commentText, submitComment],
+  );
 
-    const result = await submitComment(commentText);
-    if (result) {
-      setCommentText("");
-      setCommentAuthor("");
-    }
-  };
+  const setActiveView = useCallback(
+    (view: "feed" | "article" | "author" | "admin") => {
+      if (view === "feed") {
+        router.push("/post");
+      }
+    },
+    [router],
+  );
 
-  // Gestionnaire pour le like
-  const handleLikePost = async (postId: string) => {
-    await toggleLike();
-  };
+  const setSelectedAuthorId = useCallback(
+    (id: string | null) => {
+      if (id) {
+        router.push(`/user/${id}`);
+      }
+    },
+    [router],
+  );
 
-  // Gestionnaire pour la sauvegarde
-  const handleSavePost = (postId: string) => {
-    toggleBookmark();
-  };
-
-  // Gestionnaire pour les réactions
-  const handleToggleReaction = (postId: string, reactionId: string) => {
-    // Implémentation pour les réactions si nécessaire
-  };
-
-  // Gestionnaire pour changer la vue
-  const setActiveView = (view: "feed" | "article" | "author" | "admin") => {
-    if (view === "feed") {
-      router.push("/blog");
-    } else if (view === "author" && post) {
-      router.push(`/blog/author/${post.authorId}`);
-    }
-  };
-
-  // Gestionnaire pour sélectionner un auteur
-  const setSelectedAuthorId = (id: string | null) => {
-    if (id) {
-      router.push(`/blog/author/${id}`);
-    }
-  };
-
-  // Gestionnaire pour supprimer un commentaire
-  const handleDeleteComment = async (commentId: string) => {
-    await deleteComment(commentId);
-  };
-
-  // Gestion des erreurs
-  if (isError) {
+  // États de chargement
+  if (isLoading) {
     return (
-      <div
-        className="min-h-screen py-8 px-4"
-        style={{ backgroundColor: "var(--bg-primary)" }}
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <h2
-            className="text-2xl font-light mb-4"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Article introuvable
-          </h2>
-          <p
-            className="text-sm mb-6"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            {error?.message ||
-              "L'article que vous recherchez n'existe pas ou a été supprimé."}
-          </p>
-          <button
-            onClick={() => router.push("/blog")}
-            className="px-6 py-2 text-sm font-medium rounded-xl transition-opacity"
-            style={{
-              backgroundColor: "var(--accent)",
-              color: "var(--text-primary)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            Retour au blog
-          </button>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-neutral-800 rounded w-1/3" />
+          <div className="aspect-video bg-neutral-800 rounded-3xl" />
+          <div className="space-y-3">
+            <div className="h-4 bg-neutral-800 rounded w-full" />
+            <div className="h-4 bg-neutral-800 rounded w-5/6" />
+            <div className="h-4 bg-neutral-800 rounded w-4/6" />
+          </div>
         </div>
       </div>
     );
   }
 
-  // État de chargement
-  if (isLoading || !adaptedPost) {
+  if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-blue-950/20 via-transparent to-blue-950/10">
-        <BouncyArc size="90" speed="1.65" color="blue" />
-
-        <p className="text-sm font-light text-blue-300/80 tracking-[0.2em] ">
-          Patience...
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+        <h1
+          className="text-2xl font-bold mb-4"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Article introuvable
+        </h1>
+        <p className="text-sm mb-8" style={{ color: "var(--text-secondary)" }}>
+          {error?.message ||
+            "L'article que vous recherchez n'existe pas ou a été supprimé."}
         </p>
+        <button
+          onClick={() => router.push("/post")}
+          className="px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-transform hover:scale-[1.02]"
+          style={{ backgroundColor: "var(--accent)", color: "var(--text-primary)" }}
+        >
+          Retour au flux
+        </button>
       </div>
     );
   }
 
+  if (!activePost) {
+    return null;
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="min-h-screen py-8 px-4"
-      style={{ backgroundColor: "var(--bg-primary)" }}
-    >
+    <main className="container mx-auto px-4 py-4">
       <ArticleView
-        activePost={adaptedPost}
-        // ✅ Utilisation des tableaux typés correctement
-        likedPosts={likedPosts}
-        savedPosts={savedPosts}
-        comments={adaptedComments}
+        activePost={activePost}
+        likedPosts={isLiked ? [activePost.id] : []}
+        savedPosts={isBookmarked ? [activePost.id] : []}
+        comments={uiComments}
         userReactions={{}}
         commentAuthor={commentAuthor}
         setCommentAuthor={setCommentAuthor}
         commentText={commentText}
         setCommentText={setCommentText}
         isSubmittingComment={isSubmittingComment}
-        activeProfile={
-          user
-            ? {
-                name:
-                  [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-                  user.username,
-                avatar:
-                  user.avatar ||
-                  `https://ui-avatars.com/api/?background=6366f1&color=fff&name=${user.username?.[0] || "U"}`,
-                roleLabel: user.role === "ADMIN" ? "Admin" : "Blogger",
-              }
-            : null
-        }
+        activeProfile={undefined}
         handleLikePost={handleLikePost}
         handleSavePost={handleSavePost}
         handleToggleReaction={handleToggleReaction}
         handleCommentFormSubmit={handleCommentFormSubmit}
         setActiveView={setActiveView}
         setSelectedAuthorId={setSelectedAuthorId}
-        setAdminTab={(tab) => {
-          console.log("Admin tab:", tab);
-        }}
       />
-
-      {/* Bouton de rafraîchissement */}
-      <div className="max-w-4xl mx-auto mt-4 flex justify-end">
-        <button
-          onClick={reload}
-          className="text-xs text-(--text-tertiary) hover:text-(--text-primary) transition-colors"
-        >
-          ↻ Rafraîchir
-        </button>
-      </div>
-    </motion.div>
+    </main>
   );
 }

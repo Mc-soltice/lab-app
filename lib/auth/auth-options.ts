@@ -11,7 +11,7 @@ import { prisma } from "../prisma/client";
 declare module "next-auth" {
   interface User {
     username: string;
-    role: "ADMIN" | "BLOGGER";
+    role: "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
     avatar?: string | null;
     firstName?: string | null;
     lastName?: string | null;
@@ -24,7 +24,7 @@ declare module "next-auth" {
       id: string;
       email: string;
       username: string;
-      role: "ADMIN" | "BLOGGER";
+      role: "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
       avatar?: string | null;
       firstName?: string | null;
       lastName?: string | null;
@@ -38,7 +38,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     username: string;
-    role: "ADMIN" | "BLOGGER";
+    role: "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
     avatar?: string | null;
     firstName?: string | null;
     lastName?: string | null;
@@ -85,7 +85,7 @@ export const authOptions: AuthOptions = {
           firstName: user.firstName,
           lastName: user.lastName,
           avatar: user.avatar,
-          role: user.role as "ADMIN" | "BLOGGER",
+          role: user.role as "ADMIN" | "BLOGGER" | "GESTIONNAIRE",
         };
       },
     }),
@@ -155,7 +155,7 @@ export const authOptions: AuthOptions = {
           // Update token with database user data
           token.id = dbUser.id;
           token.username = dbUser.username;
-          token.role = dbUser.role as "ADMIN" | "BLOGGER";
+          token.role = dbUser.role as "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
           token.avatar = dbUser.avatar;
           token.firstName = dbUser.firstName;
           token.lastName = dbUser.lastName;
@@ -168,7 +168,7 @@ export const authOptions: AuthOptions = {
       if (user && !token.id) {
         token.id = user.id;
         token.username = user.username;
-        token.role = user.role as "ADMIN" | "BLOGGER";
+        token.role = user.role as "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
         token.avatar = user.avatar;
         token.firstName = user.firstName;
         token.lastName = user.lastName;

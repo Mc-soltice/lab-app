@@ -52,6 +52,11 @@ export type User = Prisma.UserModel
  */
 export type Category = Prisma.CategoryModel
 /**
+ * Model Emission
+ * 
+ */
+export type Emission = Prisma.EmissionModel
+/**
  * Model Tag
  * 
  */
@@ -101,11 +106,6 @@ export type Like = Prisma.LikeModel
  * 
  */
 export type Bookmark = Prisma.BookmarkModel
-/**
- * Model Follow
- * 
- */
-export type Follow = Prisma.FollowModel
 /**
  * Model Notification
  * 

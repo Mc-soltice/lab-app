@@ -174,9 +174,23 @@ export function usePostDetail(
   const postId = useRef<string | null>(null);
   const hasInitialLoaded = useRef(false);
   const abortController = useRef<AbortController | null>(null);
+  const isLoadingCommentsRef = useRef(false);
+  const commentsFetchedForPost = useRef<string | null>(null);
 
   // Nettoyer les aborts
   useEffect(() => {
+    // IMPORTANT: Réinitialiser les refs à chaque (re)montage.
+    // En mode développement, React StrictMode monte → démonte → remonte le composant.
+    // Les states sont réinitialisés par React, MAIS les refs persistent à travers ce cycle.
+    // Sans ces réinitialisations :
+    // 1. isMounted.current reste false après le démontage simulé → setPost jamais appelé
+    //    et setIsLoading(false) jamais exécuté → page bloquée sur le skeleton.
+    // 2. hasInitialLoaded.current restant true + currentSlug.match → l'effet [slug]
+    //    skipperait le fetch au re-montage → même résultat.
+    isMounted.current = true;
+    hasInitialLoaded.current = false;
+    currentSlug.current = null;
+
     return () => {
       isMounted.current = false;
       if (abortController.current) {
@@ -214,6 +228,16 @@ export function usePostDetail(
    */
   const fetchPost = useCallback(
     async (slugToFetch: string) => {
+      console.log("[fetchPost] Appelé avec slug:", slugToFetch);
+
+      if (!slugToFetch || !slugToFetch.trim()) {
+        console.error("[fetchPost] Slug vide, arrêt");
+        setIsLoading(false);
+        setIsError(true);
+        setError(new Error("Slug de l'article manquant"));
+        return;
+      }
+
       // Annuler la requête précédente si elle existe
       if (abortController.current) {
         abortController.current.abort();
@@ -236,9 +260,11 @@ export function usePostDetail(
       setError(null);
 
       try {
+        const url = `/api/posts/${slugToFetch}`;
+        console.log(`[fetchPost] URL construite: ${url}`);
         console.log(`📖 Chargement de l'article: ${slugToFetch}`);
 
-        const response = await fetch(`/api/posts/${slugToFetch}`, {
+        const response = await fetch(url, {
           signal: controller.signal,
           headers: {
             "Cache-Control": "no-cache",
@@ -248,8 +274,7 @@ export function usePostDetail(
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(
-            errorData.message ||
-              `Erreur ${response.status}: Article non trouvé`,
+            errorData.message || `Erreur ${response.status}: Article non trouvé`,
           );
         }
 
@@ -267,11 +292,6 @@ export function usePostDetail(
         setIsBookmarked(postData.isBookmarked || false);
         postId.current = postData.id;
 
-        // Récupérer les commentaires si demandé
-        if (initialFetchComments && postData.id) {
-          await fetchComments(1, postData.id);
-        }
-
         // Callback de succès
         if (onPostLoaded) {
           onPostLoaded(postData);
@@ -280,7 +300,9 @@ export function usePostDetail(
         console.log(`✅ Article chargé: ${postData.title}`);
       } catch (err: any) {
         if (err.name === "AbortError") {
-          console.log("🛑 Requête annulée");
+          console.log("🛑 Requête annulée - Réinitialisation pour nouvel essai");
+          // Réinitialiser pour permettre un nouvel essai au prochain render
+          hasInitialLoaded.current = false;
           return;
         }
 
@@ -315,14 +337,13 @@ export function usePostDetail(
       const targetId = targetPostId || postId.current;
 
       if (!targetId) {
-        console.warn(
-          "⚠️ Aucun postId disponible pour charger les commentaires",
-        );
+        console.warn("⚠️ Aucun postId disponible pour charger les commentaires");
         return;
       }
 
-      if (isLoadingComments) return;
+      if (isLoadingCommentsRef.current) return;
 
+      isLoadingCommentsRef.current = true;
       setIsLoadingComments(true);
 
       try {
@@ -342,9 +363,7 @@ export function usePostDetail(
 
         if (!isMounted.current) return;
 
-        setComments((prev) =>
-          page === 1 ? data.data : [...prev, ...data.data],
-        );
+        setComments((prev) => (page === 1 ? data.data : [...prev, ...data.data]));
         setCommentsPagination({
           page: data.meta.page,
           limit: data.meta.limit,
@@ -354,16 +373,15 @@ export function usePostDetail(
         });
       } catch (err: any) {
         console.error("❌ Erreur lors du chargement des commentaires:", err);
-        toast.error(
-          err.message || "Erreur lors du chargement des commentaires",
-        );
+        toast.error(err.message || "Erreur lors du chargement des commentaires");
       } finally {
+        isLoadingCommentsRef.current = false;
         if (isMounted.current) {
           setIsLoadingComments(false);
         }
       }
     },
-    [commentsLimit, isLoadingComments],
+    [commentsLimit],
   );
 
   /**
@@ -507,16 +525,13 @@ export function usePostDetail(
       setIsSubmittingComment(true);
 
       try {
-        const response = await fetch(
-          `/api/posts/${currentSlug.current}/comments`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ content: content.trim() }),
+        const response = await fetch(`/api/posts/${currentSlug.current}/comments`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({ content: content.trim() }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -536,9 +551,7 @@ export function usePostDetail(
         return newComment;
       } catch (err: any) {
         console.error("❌ Erreur submitComment:", err);
-        toast.error(
-          err.message || "Erreur lors de la publication du commentaire",
-        );
+        toast.error(err.message || "Erreur lors de la publication du commentaire");
         return null;
       } finally {
         setIsSubmittingComment(false);
@@ -586,9 +599,7 @@ export function usePostDetail(
         toast.success("Commentaire supprimé");
       } catch (err: any) {
         console.error("❌ Erreur deleteComment:", err);
-        toast.error(
-          err.message || "Erreur lors de la suppression du commentaire",
-        );
+        toast.error(err.message || "Erreur lors de la suppression du commentaire");
       }
     },
     [isAuthenticated, comments, user],
@@ -662,19 +673,41 @@ export function usePostDetail(
 
   // Effet pour charger l'article au montage ou quand le slug change
   useEffect(() => {
-    if (!slug) return;
-    if (hasInitialLoaded.current && currentSlug.current === slug) return;
+    console.log(
+      "[usePostDetail Effect] Slug:",
+      slug,
+      "Already loaded:",
+      hasInitialLoaded.current,
+      "Current slug:",
+      currentSlug.current,
+    );
 
+    if (!slug || !slug.trim()) {
+      console.warn("[usePostDetail] Slug vide ou invalide, arrêt du chargement");
+      setIsLoading(false);
+      setIsError(true);
+      setError(new Error("Slug de l'article manquant"));
+      return;
+    }
+
+    if (hasInitialLoaded.current && currentSlug.current === slug) {
+      console.log("[usePostDetail] Article déjà chargé, skip");
+      return;
+    }
+
+    console.log("[usePostDetail] Déclenchement du fetch pour slug:", slug);
     hasInitialLoaded.current = true;
     void fetchPost(slug);
   }, [slug, fetchPost]);
 
   // Effet pour mettre à jour les commentaires quand l'article change
   useEffect(() => {
-    if (post && initialFetchComments) {
-      fetchComments(1, post.id);
+    if (post && initialFetchComments && commentsFetchedForPost.current !== post.id) {
+      commentsFetchedForPost.current = post.id;
+      void fetchComments(1, post.id);
     }
-  }, [post, initialFetchComments, fetchComments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post, initialFetchComments]);
 
   // Computed values
   const canInteract = isAuthenticated;

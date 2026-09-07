@@ -1,18 +1,92 @@
 // components/blog/create/AudioUpload.tsx
 "use client";
 
-import { Music, X } from "lucide-react";
+import { Film, Loader2, Music, X } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 interface AudioUploadProps {
   audio_url: string;
-  onAudioChange: (url: string, duration?: number) => void;
+  media_type?: "AUDIO" | "VIDEO";
+  onAudioChange: (
+    url: string,
+    duration?: number,
+    mediaType?: "AUDIO" | "VIDEO",
+  ) => void;
   onAudioRemove: () => void;
+}
+
+async function optimizeVideoForUpload(file: File): Promise<File> {
+  if (file.size <= 25 * 1024 * 1024 || typeof MediaRecorder === "undefined") {
+    return file;
+  }
+
+  const video = document.createElement("video");
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = "auto";
+  video.src = URL.createObjectURL(file);
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      video.addEventListener("loadedmetadata", () => resolve(), { once: true });
+      video.addEventListener("error", () => reject(new Error("Vidéo illisible")), {
+        once: true,
+      });
+    });
+
+    const source = (
+      video as HTMLVideoElement & {
+        captureStream?: () => MediaStream;
+      }
+    ).captureStream?.();
+    if (!source) return file;
+
+    const mimeType = ["video/webm;codecs=vp9,opus", "video/webm"].find((type) =>
+      MediaRecorder.isTypeSupported(type),
+    );
+    if (!mimeType) return file;
+
+    const recorder = new MediaRecorder(source, {
+      mimeType,
+      videoBitsPerSecond: 2_500_000,
+    });
+    const chunks: Blob[] = [];
+    const optimized = new Promise<Blob>((resolve, reject) => {
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data.size > 0) chunks.push(event.data);
+      });
+      recorder.addEventListener("stop", () =>
+        resolve(new Blob(chunks, { type: mimeType })),
+      );
+      recorder.addEventListener("error", () =>
+        reject(new Error("Réencodage impossible")),
+      );
+    });
+
+    recorder.start();
+    await video.play();
+    await new Promise<void>((resolve) => {
+      video.addEventListener("ended", () => resolve(), { once: true });
+    });
+    recorder.stop();
+
+    const blob = await optimized;
+    return blob.size < file.size
+      ? new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webm`, {
+          type: mimeType,
+        })
+      : file;
+  } catch {
+    return file;
+  } finally {
+    URL.revokeObjectURL(video.src);
+  }
 }
 
 export default function AudioUpload({
   audio_url,
+  media_type = "AUDIO",
   onAudioChange,
   onAudioRemove,
 }: AudioUploadProps) {
@@ -24,28 +98,41 @@ export default function AudioUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("audio/") && !file.type.startsWith("video/")) {
+      toast.error("Sélectionnez un fichier audio ou vidéo valide");
+      return;
+    }
+    if (file.size > 250 * 1024 * 1024) {
+      toast.error("Le média ne doit pas dépasser 250 Mo");
+      return;
+    }
+
     setIsLoading(true);
-    const objectUrl = URL.createObjectURL(file);
+    const optimizedFile = file.type.startsWith("video/")
+      ? await optimizeVideoForUpload(file)
+      : file;
+    const objectUrl = URL.createObjectURL(optimizedFile);
+    const detectedMediaType = file.type.startsWith("video/") ? "VIDEO" : "AUDIO";
 
     try {
       const duration = await new Promise<number | null>((resolve) => {
-        const audio = new Audio();
-        audio.src = objectUrl;
-        audio.addEventListener("loadedmetadata", () => {
-          resolve(Math.floor(audio.duration));
+        const media = document.createElement(
+          detectedMediaType === "VIDEO" ? "video" : "audio",
+        );
+        media.preload = "metadata";
+        media.src = objectUrl;
+        media.addEventListener("loadedmetadata", () => {
+          resolve(Number.isFinite(media.duration) ? Math.floor(media.duration) : null);
         });
-        audio.addEventListener("error", () => {
+        media.addEventListener("error", () => {
           resolve(null);
         });
       });
 
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", optimizedFile);
       formData.append("folder", "blog/podcasts");
-      formData.append(
-        "resourceType",
-        file.type.startsWith("audio/") ? "auto" : "video",
-      );
+      formData.append("resourceType", detectedMediaType === "VIDEO" ? "video" : "auto");
 
       const response = await fetch("/api/upload", {
         method: "POST",
@@ -55,18 +142,18 @@ export default function AudioUpload({
       const result = await response.json();
 
       if (!response.ok || !result.data?.secure_url) {
-        throw new Error(result.error || "Impossible d'uploader l'audio");
+        throw new Error(result.error || "Impossible d'uploader le média");
       }
 
       setAudioDuration(duration ?? null);
-      onAudioChange(result.data.secure_url, duration ?? undefined);
-      toast.success("Audio uploadé avec succès");
+      onAudioChange(result.data.secure_url, duration ?? undefined, detectedMediaType);
+      toast.success(
+        `${detectedMediaType === "VIDEO" ? "Vidéo" : "Audio"} uploadé avec succès`,
+      );
     } catch (error) {
       console.error("Erreur upload audio:", error);
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Erreur lors de l'upload audio",
+        error instanceof Error ? error.message : "Erreur lors de l'upload du média",
       );
     } finally {
       URL.revokeObjectURL(objectUrl);
@@ -80,10 +167,11 @@ export default function AudioUpload({
 
     // Si c'est une URL, essayer d'extraire la durée
     if (url && (url.startsWith("http") || url.startsWith("https"))) {
-      const audio = new Audio();
-      audio.src = url;
-      audio.addEventListener("loadedmetadata", () => {
-        const duration = Math.floor(audio.duration);
+      const media = document.createElement(media_type === "VIDEO" ? "video" : "audio");
+      media.preload = "metadata";
+      media.src = url;
+      media.addEventListener("loadedmetadata", () => {
+        const duration = Math.floor(media.duration);
         setAudioDuration(duration);
         onAudioChange(url, duration);
       });
@@ -112,12 +200,13 @@ export default function AudioUpload({
       </label>
 
       {audio_url ? (
-        <div
-          className="p-4 rounded-xl border"
-          style={{ borderColor: "var(--border)" }}
-        >
+        <div className="p-4 rounded-xl border" style={{ borderColor: "var(--border)" }}>
           <div className="flex items-center gap-3">
-            <Music className="w-5 h-5" style={{ color: "var(--accent)" }} />
+            {media_type === "VIDEO" ? (
+              <Film className="w-5 h-5" style={{ color: "var(--accent)" }} />
+            ) : (
+              <Music className="w-5 h-5" style={{ color: "var(--accent)" }} />
+            )}
             <span
               className="text-sm truncate flex-1"
               style={{ color: "var(--text-secondary)" }}
@@ -146,7 +235,21 @@ export default function AudioUpload({
               <X className="w-4 h-4" />
             </button>
           </div>
-          <audio controls src={audio_url} className="w-full mt-3" />
+          {media_type === "VIDEO" ? (
+            <video
+              controls
+              src={audio_url}
+              className="mt-3 max-h-72 w-full rounded-xl"
+              preload="metadata"
+            />
+          ) : (
+            <audio
+              controls
+              src={audio_url}
+              className="mt-3 w-full"
+              preload="metadata"
+            />
+          )}
         </div>
       ) : (
         <button
@@ -155,12 +258,8 @@ export default function AudioUpload({
           disabled={isLoading}
           className="w-full aspect-video border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-colors disabled:opacity-50"
           style={{ borderColor: "var(--border)" }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.borderColor = "var(--accent)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.borderColor = "var(--border)")
-          }
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
         >
           {isLoading ? (
             <>
@@ -168,30 +267,22 @@ export default function AudioUpload({
                 className="animate-spin rounded-full h-8 w-8 border-2"
                 style={{ borderColor: "var(--accent)" }}
               />
-              <span
-                className="text-sm"
-                style={{ color: "var(--text-secondary)" }}
-              >
+              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 Analyse du fichier audio...
               </span>
             </>
           ) : (
             <>
-              <Music
-                className="w-8 h-8"
-                style={{ color: "var(--text-tertiary)" }}
-              />
-              <span
-                className="text-sm"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Ajouter un fichier audio
+              {media_type === "VIDEO" ? (
+                <Film className="w-8 h-8" style={{ color: "var(--text-tertiary)" }} />
+              ) : (
+                <Music className="w-8 h-8" style={{ color: "var(--text-tertiary)" }} />
+              )}
+              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                Ajouter un fichier {media_type === "VIDEO" ? "vidéo" : "audio"}
               </span>
-              <span
-                className="text-xs"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                MP3, WAV, AAC (max 50MB)
+              <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+                Audio ou vidéo (max 250MB)
               </span>
             </>
           )}
@@ -201,7 +292,7 @@ export default function AudioUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="audio/*"
+        accept="audio/*,video/*"
         onChange={handleFileChange}
         className="hidden"
         disabled={isLoading}
@@ -219,7 +310,7 @@ export default function AudioUpload({
         }}
         onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
         onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-        placeholder="Ou URL du fichier audio"
+        placeholder="Ou URL du fichier audio ou vidéo"
       />
     </div>
   );

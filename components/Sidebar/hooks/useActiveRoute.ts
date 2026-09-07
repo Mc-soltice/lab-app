@@ -2,31 +2,39 @@
 
 import { usePathname } from "next/navigation";
 
+interface RouteCandidate {
+  href: string;
+}
+
 export function useActiveRoute() {
   const pathname = usePathname();
 
   /**
-   * Vérifie si une route correspond
-   * Plus robuste pour gérer les sous-routes
+   * Détermine UN SEUL lien actif en retournant le href le plus spécifique :
+   * 1. correspondance exacte prioritaire
+   * 2. sinon, le préfixe le plus long gagne
+   *
+   * Exemple sur "/dashboard/podcasts" :
+   * "/dashboard/podcasts" (enfant Podcasts) gagne sur "/dashboard" (Dashboard
+   * et groupe Administration) => un seul onglet actif.
    */
-  const isActiveRoute = (href: string) => {
-    // Cas particulier : la home "/" ne doit pas matcher toutes les routes
-    if (href === "/") {
-      return pathname === "/";
+  const findActiveRoute = (items: RouteCandidate[]): string | null => {
+    // 1. Correspondance exacte
+    const exact = items.find((item) => item.href === pathname);
+    if (exact) {
+      return exact.href;
     }
 
-    // Cas exact : on est sur la route exacte
-    if (pathname === href) {
-      return true;
-    }
+    // 2. Préfixes : l'URL la plus longue l'emporte
+    const prefixes = items
+      .filter((item) => item.href !== "/" && pathname.startsWith(`${item.href}/`))
+      .sort((a, b) => b.href.length - a.href.length);
 
-    // Cas des sous-routes : on vérifie que c'est un préfixe avec un slash
-    // Exemple : "/dashboard" matche "/dashboard/users" mais pas "/dashboard-other"
-    return pathname.startsWith(`${href}/`);
+    return prefixes.length > 0 ? prefixes[0].href : null;
   };
 
   return {
     pathname,
-    isActiveRoute,
+    findActiveRoute,
   };
 }

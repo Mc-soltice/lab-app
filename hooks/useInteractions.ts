@@ -6,7 +6,6 @@ import { toast } from "react-hot-toast";
 export interface InteractionState {
   isLiked: boolean;
   isBookmarked: boolean;
-  isFollowing: boolean;
   likesCount: number;
   bookmarksCount?: number;
 }
@@ -15,72 +14,79 @@ export interface UseInteractionsOptions {
   targetId: string;
   targetType: "post" | "podcast" | "book" | "comment";
   authorId?: string;
-  authorUsername?: string;
   currentUserId?: string | null;
   initialLiked?: boolean;
   initialBookmarked?: boolean;
-  initialFollowing?: boolean;
   initialLikesCount?: number;
   initialBookmarksCount?: number;
   onLikeToggle?: (isLiked: boolean) => void;
   onBookmarkToggle?: (isBookmarked: boolean) => void;
-  onFollowToggle?: (isFollowing: boolean) => void;
   onError?: (error: Error) => void;
 }
 
 export interface UseInteractionsReturn {
   isLiked: boolean;
   isBookmarked: boolean;
-  isFollowing: boolean;
   likesCount: number;
   bookmarksCount: number;
   isLiking: boolean;
   isBookmarking: boolean;
-  isFollowingAction: boolean;
   toggleLike: () => Promise<void>;
   toggleBookmark: () => Promise<void>;
-  toggleFollow: () => Promise<void>;
   canInteract: boolean;
-  canFollow: boolean;
   isOwnContent: boolean;
+}
+
+// Helper pour exécuter une mutation d'interaction
+async function performInteractionRequest(
+  endpoint: string,
+  body: Record<string, any>,
+) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || "Erreur lors de la requête");
+  }
+  return data;
 }
 
 export function useInteractions({
   targetId,
   targetType,
   authorId,
-  authorUsername,
   currentUserId,
   initialLiked = false,
   initialBookmarked = false,
-  initialFollowing = false,
   initialLikesCount = 0,
   initialBookmarksCount = 0,
   onLikeToggle,
   onBookmarkToggle,
-  onFollowToggle,
   onError,
 }: UseInteractionsOptions): UseInteractionsReturn {
   const router = useRouter();
 
+  // États
   const [isLiked, setIsLiked] = useState<boolean>(initialLiked);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(initialBookmarked);
-  const [isFollowing, setIsFollowing] = useState<boolean>(initialFollowing);
   const [likesCount, setLikesCount] = useState<number>(initialLikesCount);
   const [bookmarksCount, setBookmarksCount] = useState<number>(
     initialBookmarksCount,
   );
 
+  // États de chargement
   const [isLiking, setIsLiking] = useState<boolean>(false);
   const [isBookmarking, setIsBookmarking] = useState<boolean>(false);
-  const [isFollowingAction, setIsFollowingAction] = useState<boolean>(false);
 
-  const likeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const bookmarkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const followTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Références pour les délais
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Calculs simples (pas de useMemo nécessaire)
   const canInteract = !!currentUserId;
-  const canFollow = !!currentUserId && authorId !== currentUserId;
   const isOwnContent = authorId === currentUserId;
 
   const handleAuthRedirect = useCallback(() => {
@@ -91,7 +97,6 @@ export function useInteractions({
   const handleError = useCallback(
     (error: Error, action: string) => {
       console.error(`Erreur lors de ${action}:`, error);
-      toast.error(`Erreur lors de ${action}, veuillez réessayer`);
       onError?.(error);
     },
     [onError],
@@ -111,54 +116,29 @@ export function useInteractions({
     const newIsLiked = !isLiked;
 
     setIsLiked(newIsLiked);
-    setLikesCount((prev: number) => (newIsLiked ? prev + 1 : prev - 1));
+    setLikesCount((prev) => (newIsLiked ? prev + 1 : prev - 1));
 
-    if (likeTimeoutRef.current) {
-      clearTimeout(likeTimeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-    likeTimeoutRef.current = setTimeout(async () => {
+    timeoutRef.current = setTimeout(async () => {
       try {
-        const response = await fetch("/api/interactions/like", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: targetType,
-            id: targetId,
-          }),
+        await performInteractionRequest("/api/interactions/like", {
+          type: targetType,
+          id: targetId,
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Erreur lors du like");
-        }
-
         onLikeToggle?.(newIsLiked);
-
-        if (newIsLiked) {
-          toast.success("❤️ Aimé");
-        }
+        if (newIsLiked) toast.success("❤️ Aimé");
       } catch (error) {
         setIsLiked(previousLiked);
         setLikesCount(previousCount);
         handleError(error as Error, "le like");
       } finally {
         setIsLiking(false);
-        likeTimeoutRef.current = null;
+        timeoutRef.current = null;
       }
     }, 300);
-  }, [
-    canInteract,
-    isLiking,
-    isLiked,
-    likesCount,
-    targetId,
-    targetType,
-    currentUserId,
-    handleAuthRedirect,
-    onLikeToggle,
-    handleError,
-  ]);
+  }, [canInteract, isLiking, isLiked, likesCount, targetId, targetType, handleAuthRedirect, onLikeToggle, handleError]);
 
   const toggleBookmark = useCallback(async () => {
     if (!canInteract) {
@@ -173,156 +153,46 @@ export function useInteractions({
     const newIsBookmarked = !isBookmarked;
 
     setIsBookmarked(newIsBookmarked);
-
     if (bookmarksCount !== undefined) {
-      setBookmarksCount((prev: number) =>
-        newIsBookmarked ? prev + 1 : prev - 1,
-      );
+      setBookmarksCount((prev) => (newIsBookmarked ? prev + 1 : prev - 1));
     }
 
-    if (bookmarkTimeoutRef.current) {
-      clearTimeout(bookmarkTimeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-    bookmarkTimeoutRef.current = setTimeout(async () => {
+    timeoutRef.current = setTimeout(async () => {
       try {
-        const response = await fetch("/api/interactions/bookmark", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: targetType,
-            id: targetId,
-          }),
+        await performInteractionRequest("/api/interactions/bookmark", {
+          type: targetType,
+          id: targetId,
         });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Erreur lors du bookmark");
-        }
 
         onBookmarkToggle?.(newIsBookmarked);
         toast.success(
-          newIsBookmarked ? "📑 Ajouté aux favoris" : "Retiré des favoris",
+          newIsBookmarked ? "📑 Ajouté aux favoris" : "Retiré des favoris"
         );
       } catch (error) {
         setIsBookmarked(previousBookmarked);
         if (bookmarksCount !== undefined) {
-          setBookmarksCount((prev: number) =>
-            previousBookmarked ? prev + 1 : prev - 1,
-          );
+          setBookmarksCount((prev) => (previousBookmarked ? prev + 1 : prev - 1));
         }
         handleError(error as Error, "le bookmark");
       } finally {
         setIsBookmarking(false);
-        bookmarkTimeoutRef.current = null;
+        timeoutRef.current = null;
       }
     }, 300);
-  }, [
-    canInteract,
-    isBookmarking,
-    isBookmarked,
-    bookmarksCount,
-    targetId,
-    targetType,
-    currentUserId,
-    handleAuthRedirect,
-    onBookmarkToggle,
-    handleError,
-  ]);
-
-  const toggleFollow = useCallback(async () => {
-    if (!canInteract) {
-      handleAuthRedirect();
-      return;
-    }
-
-    if (!canFollow) {
-      toast.error("Vous ne pouvez pas vous suivre vous-même");
-      return;
-    }
-
-    if (isFollowingAction) return;
-    setIsFollowingAction(true);
-
-    const previousFollowing = isFollowing;
-    const newIsFollowing = !isFollowing;
-
-    // Optimistic update
-    setIsFollowing(newIsFollowing);
-
-    if (followTimeoutRef.current) {
-      clearTimeout(followTimeoutRef.current);
-    }
-
-    followTimeoutRef.current = setTimeout(async () => {
-      try {
-        if (!authorUsername) {
-          throw new Error("Nom d'utilisateur de l'auteur manquant");
-        }
-
-        const response = await fetch(
-          `/api/users/${encodeURIComponent(authorUsername)}/follow`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        // Lire la réponse même en cas d'erreur
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Erreur lors du follow");
-        }
-
-        onFollowToggle?.(newIsFollowing);
-
-        toast.success(
-          newIsFollowing
-            ? `👤 Vous suivez maintenant ${authorUsername}`
-            : `Vous ne suivez plus ${authorUsername}`,
-        );
-      } catch (error) {
-        // Revenir à l'état précédent
-        setIsFollowing(previousFollowing);
-
-        const errorMessage =
-          error instanceof Error ? error.message : "Erreur inconnue";
-        console.error("[Follow] Error:", error);
-        toast.error(`Erreur : ${errorMessage}`);
-        onError?.(error as Error);
-      } finally {
-        setIsFollowingAction(false);
-        followTimeoutRef.current = null;
-      }
-    }, 300);
-  }, [
-    canInteract,
-    canFollow,
-    isFollowingAction,
-    isFollowing,
-    authorUsername,
-    handleAuthRedirect,
-    onFollowToggle,
-    onError,
-  ]);
+  }, [canInteract, isBookmarking, isBookmarked, bookmarksCount, targetId, targetType, handleAuthRedirect, onBookmarkToggle, handleError]);
 
   return {
     isLiked,
     isBookmarked,
-    isFollowing,
     likesCount,
     bookmarksCount,
     isLiking,
     isBookmarking,
-    isFollowingAction,
     toggleLike,
     toggleBookmark,
-    toggleFollow,
     canInteract,
-    canFollow,
     isOwnContent,
   };
 }

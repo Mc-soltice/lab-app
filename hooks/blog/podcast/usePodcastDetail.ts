@@ -32,6 +32,7 @@ export interface PodcastDetailData {
   description: string | null;
   content?: string | null;
   audioUrl: string;
+  mediaType?: "AUDIO" | "VIDEO";
   coverImage: string | null;
   duration: number;
   transcript: string | null;
@@ -202,8 +203,7 @@ export function usePodcastDetail(
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(
-            errorData.message ||
-              `Erreur ${response.status}: Podcast non trouvé`,
+            errorData.message || `Erreur ${response.status}: Podcast non trouvé`,
           );
         }
 
@@ -233,8 +233,7 @@ export function usePodcastDetail(
         toast.error(err.message || "Erreur lors du chargement du podcast");
       } finally {
         if (isMounted.current) setIsLoading(false);
-        if (abortController.current === controller)
-          abortController.current = null;
+        if (abortController.current === controller) abortController.current = null;
       }
     },
     [initialFetchComments, onError, onPodcastLoaded, reset],
@@ -262,9 +261,7 @@ export function usePodcastDetail(
         const data = await response.json();
         if (!isMounted.current) return;
 
-        setComments((prev) =>
-          page === 1 ? data.data : [...prev, ...data.data],
-        );
+        setComments((prev) => (page === 1 ? data.data : [...prev, ...data.data]));
         setCommentsPagination({
           page: data.meta.page,
           limit: data.meta.limit,
@@ -274,9 +271,7 @@ export function usePodcastDetail(
         });
       } catch (err: any) {
         console.error("Erreur lors du chargement des commentaires:", err);
-        toast.error(
-          err.message || "Erreur lors du chargement des commentaires",
-        );
+        toast.error(err.message || "Erreur lors du chargement des commentaires");
       } finally {
         if (isMounted.current) setIsLoadingComments(false);
       }
@@ -298,13 +293,10 @@ export function usePodcastDetail(
     setLikesCount((prev) => (!isLiked ? prev + 1 : prev - 1));
 
     try {
-      const response = await fetch(
-        `/api/podcasts/${currentSlug.current}/like`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      const response = await fetch(`/api/podcasts/${currentSlug.current}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -335,13 +327,10 @@ export function usePodcastDetail(
     setIsBookmarked(!isBookmarked);
 
     try {
-      const response = await fetch(
-        `/api/podcasts/${currentSlug.current}/bookmark`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      const response = await fetch(`/api/podcasts/${currentSlug.current}/bookmark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -376,14 +365,11 @@ export function usePodcastDetail(
 
       setIsSubmittingComment(true);
       try {
-        const response = await fetch(
-          `/api/podcasts/${currentSlug.current}/comments`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: content.trim() }),
-          },
-        );
+        const response = await fetch(`/api/podcasts/${currentSlug.current}/comments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: content.trim() }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -398,9 +384,7 @@ export function usePodcastDetail(
         toast.success("Commentaire publié avec succès");
         return newComment;
       } catch (err: any) {
-        toast.error(
-          err.message || "Erreur lors de la publication du commentaire",
-        );
+        toast.error(err.message || "Erreur lors de la publication du commentaire");
         return null;
       } finally {
         setIsSubmittingComment(false);
@@ -439,9 +423,7 @@ export function usePodcastDetail(
         setCommentsCount((prev) => prev - 1);
         toast.success("Commentaire supprimé");
       } catch (err: any) {
-        toast.error(
-          err.message || "Erreur lors de la suppression du commentaire",
-        );
+        toast.error(err.message || "Erreur lors de la suppression du commentaire");
       }
     },
     [comments, isAuthenticated, user?.id, user?.role],

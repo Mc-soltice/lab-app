@@ -10,7 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const tag = await tagService.getTagBySlug(params.slug);
+    const { slug } = await params;
+    const tag = await tagService.getTagBySlug(slug);
     return NextResponse.json(tag);
   } catch (error) {
     return handleError(error);

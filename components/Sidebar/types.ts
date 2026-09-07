@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-export type UserRole = "ADMIN" | "BLOGGER";
+export type UserRole = "ADMIN" | "BLOGGER" | "GESTIONNAIRE";
 
 export interface SidebarItemType {
   label: string;

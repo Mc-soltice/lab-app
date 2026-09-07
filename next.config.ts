@@ -1,6 +1,18 @@
 import type { NextConfig } from "next";
 
+// Analyseur de bundle optionnel
+const withBundleAnalyzer =
+  process.env.ANALYZE === "true"
+    ? require("@next/bundle-analyzer")({
+        enabled: process.env.ANALYZE === "true",
+      })
+    : (config: NextConfig) => config;
+
 const nextConfig: NextConfig = {
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: true,
+  productionBrowserSourceMaps: false,
   images: {
     remotePatterns: [
       {
@@ -48,12 +60,12 @@ const nextConfig: NextConfig = {
         hostname: "picsum.photos",
       },
     ],
-    // Optionnel: limiter les formats d'images
+    // Formats d'images optimisés
     formats: ["image/avif", "image/webp"],
-    // Optionnel: domaine par défaut pour les images non optimisées
+    // Tailles d'appareils
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

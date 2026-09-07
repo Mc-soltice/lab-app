@@ -8,6 +8,7 @@ interface ProductImageProps extends Omit<ImageProps, "src"> {
   src?: string | null;
   alt: string;
   onLoad?: () => void;
+  priority?: boolean;
 }
 
 export default function ProductImage({
@@ -19,6 +20,7 @@ export default function ProductImage({
   height,
   fill = false,
   sizes,
+  priority = false,
   ...rest
 }: ProductImageProps) {
   const [hasError, setHasError] = useState(false);
@@ -62,8 +64,9 @@ export default function ProductImage({
           onLoad={() => {
             onLoad?.();
           }}
-          loading="lazy"
-          quality={75}
+          loading={priority ? "eager" : "lazy"}
+          priority={priority}
+          quality={priority ? 85 : 75}
           {...imageProps}
         />
       </div>
@@ -89,9 +92,16 @@ export default function ProductImage({
       onLoad={() => {
         onLoad?.();
       }}
-      loading="lazy"
-      quality={75}
+      loading={priority ? "eager" : "lazy"}
+      priority={priority}
+      quality={priority ? 85 : 75}
+      sizes={
+        fill
+          ? sizes || "(max-width: 768px) 100vw, 33vw"
+          : undefined
+      }
       {...imageProps}
     />
   );
 }
+

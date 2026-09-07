@@ -1,7 +1,7 @@
 // app/auth/google-callback/page.tsx
 "use client";
 
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "react-hot-toast";
@@ -46,7 +46,14 @@ export default function GoogleCallbackPage() {
         }
 
         toast.success("Connexion avec Google réussie !");
-        router.push("/home");
+        // Rediriger selon le rôle
+        const session = await getSession();
+        const role = session?.user?.role;
+        if (role === "ADMIN" || role === "GESTIONNAIRE") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/post");
+        }
       } catch (error) {
         console.error("Erreur callback Google:", error);
         router.push("/login");

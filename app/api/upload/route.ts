@@ -2,8 +2,7 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 const cloudName =
-  process.env.CLOUDINARY_CLOUD_NAME ||
-  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const apiKey =
   process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
 const apiSecret = (
@@ -18,10 +17,7 @@ function createCloudinarySignature(params: Record<string, string | number>) {
     .map(([key, value]) => `${key}=${value}`)
     .join("&");
 
-  return crypto
-    .createHash("sha1")
-    .update(`${sortedParams}${apiSecret}`)
-    .digest("hex");
+  return crypto.createHash("sha1").update(`${sortedParams}${apiSecret}`).digest("hex");
 }
 
 export async function POST(req: NextRequest) {
@@ -29,8 +25,7 @@ export async function POST(req: NextRequest) {
     if (!cloudName || !apiKey || !apiSecret) {
       return NextResponse.json(
         {
-          error:
-            "Les variables Cloudinary ne sont pas configurées côté serveur.",
+          error: "Les variables Cloudinary ne sont pas configurées côté serveur.",
         },
         { status: 500 },
       );
@@ -44,9 +39,13 @@ export async function POST(req: NextRequest) {
     ).toLowerCase();
 
     if (!file) {
+      return NextResponse.json({ error: "Aucun fichier fourni" }, { status: 400 });
+    }
+
+    if (file.size > 250 * 1024 * 1024) {
       return NextResponse.json(
-        { error: "Aucun fichier fourni" },
-        { status: 400 },
+        { error: "Le fichier ne doit pas dépasser 250 Mo" },
+        { status: 413 },
       );
     }
 
@@ -117,8 +116,7 @@ export async function POST(req: NextRequest) {
     console.error("Upload error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Erreur lors de l’upload",
+        error: error instanceof Error ? error.message : "Erreur lors de l’upload",
       },
       { status: 500 },
     );
@@ -130,8 +128,7 @@ export async function DELETE(req: NextRequest) {
     if (!cloudName || !apiKey || !apiSecret) {
       return NextResponse.json(
         {
-          error:
-            "Les variables Cloudinary ne sont pas configurées côté serveur.",
+          error: "Les variables Cloudinary ne sont pas configurées côté serveur.",
         },
         { status: 500 },
       );
@@ -141,10 +138,7 @@ export async function DELETE(req: NextRequest) {
     const publicId = searchParams.get("publicId");
 
     if (!publicId) {
-      return NextResponse.json(
-        { error: "Aucun publicId fourni" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Aucun publicId fourni" }, { status: 400 });
     }
 
     const timestamp = Math.floor(Date.now() / 1000);
@@ -174,8 +168,7 @@ export async function DELETE(req: NextRequest) {
     if (!cloudinaryResponse.ok || result.result !== "ok") {
       return NextResponse.json(
         {
-          error:
-            result.error?.message || "Erreur lors de la suppression Cloudinary",
+          error: result.error?.message || "Erreur lors de la suppression Cloudinary",
         },
         { status: 500 },
       );
@@ -186,10 +179,7 @@ export async function DELETE(req: NextRequest) {
     console.error("Delete upload error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de la suppression",
+        error: error instanceof Error ? error.message : "Erreur lors de la suppression",
       },
       { status: 500 },
     );

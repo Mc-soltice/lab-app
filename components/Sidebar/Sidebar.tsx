@@ -1,195 +1,233 @@
 "use client";
 
-import { useTheme } from "@/contexts/theme/ThemeContext";
-import { Menu, Moon, Sun, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronsLeft, X } from "lucide-react";
+import { useState } from "react";
+
+import { useAuth } from "@/hooks/useAuth";
+import { canAccessAdmin } from "@/lib/auth/permissions";
 
 import { useActiveRoute } from "./hooks/useActiveRoute";
-import { useUserRole } from "./hooks/useUserRole";
 import { navigation } from "./navigation";
-import SidebarFooter from "./SidebarFooter";
 import SidebarGroup from "./SidebarGroup";
+import SidebarFooter from "./SidebarFooter";
 import SidebarItem from "./SidebarItem";
-import SidebarLogo from "./SidebarLogo";
+import type { SidebarItemType, UserRole } from "./types";
 
-import type { SidebarItemType } from "./types";
-
-export default function Sidebar() {
-  const { isActiveRoute } = useActiveRoute();
-  const userRole = useUserRole();
-  const { theme, toggleTheme } = useTheme();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Gérer le responsive
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      if (width < 768) {
-        setIsCollapsed(true);
-        setIsMobileOpen(false);
-      } else if (width < 1024) {
-        setIsCollapsed(true);
-      } else {
-        setIsCollapsed(false);
-        setIsMobileOpen(false);
+// ---------------------------------------------------------------------------
+// Filtrage par rôle
+// ---------------------------------------------------------------------------
+function filterByRole(items: SidebarItemType[], role?: string): SidebarItemType[] {
+  return items
+    .filter((item) => {
+      if (item.label === "Administration") {
+        return canAccessAdmin(role);
       }
-    };
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+      if (item.roles && item.roles.length > 0) {
+        return item.roles.includes(role as UserRole);
+      }
 
-  // Filtrer la navigation selon les rôles
-  const filteredNavigation = useMemo(() => {
-    const filterByRole = (items: SidebarItemType[]): SidebarItemType[] => {
-      return items
-        .filter((item) => {
-          if (!item.roles) return true;
-          return item.roles.includes(userRole);
-        })
-        .map((item) => {
-          if (item.children) {
-            return {
-              ...item,
-              children: filterByRole(item.children),
-            };
-          }
-          return item;
-        });
-    };
+      return true;
+    })
+    .map((item) => {
+      if (item.label === "Administration") {
+        return item;
+      }
 
-    return filterByRole(navigation);
-  }, [userRole]);
+      return {
+        ...item,
+        children: item.children ? filterByRole(item.children, role) : undefined,
+      };
+    });
+}
 
-  // Déterminer si le sidebar est visible (largeur complète)
-  const isExpanded = !isCollapsed || (isCollapsed && isHovered);
+// ---------------------------------------------------------------------------
+// Sidebar
+// ---------------------------------------------------------------------------
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
 
-  // Contenu du sidebar
-  const sidebarContent = (
-    <div className="flex h-full flex-col">
-      <SidebarLogo collapsed={!isExpanded} />
+export default function Sidebar({
+  mobileOpen = false,
+  onCloseMobile,
+}: SidebarProps = {}) {
+  const { user } = useAuth();
+  const { findActiveRoute } = useActiveRoute();
+  const [pinned, setPinned] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const collapsed = !pinned && !isHovered;
 
-      <nav
-        className="flex-1 space-y-2 overflow-y-auto"
-        role="navigation"
-        aria-label="Navigation principale"
+  const visibleItems = filterByRole(navigation, user?.role);
+
+  // Aplatit tous les liens (y compris les sous-menus), puis détermine
+  // UN SEUL onglet actif : correspondance exacte d'abord, sinon le
+  // préfixe le plus long (ex. "/dashboard/podcasts" gagne sur "/dashboard")
+  const allRoutes: { href: string }[] = [];
+  const collectRoutes = (items: SidebarItemType[]) => {
+    items.forEach((item) => {
+      allRoutes.push({ href: item.href });
+      if (item.children) {
+        collectRoutes(item.children);
+      }
+    });
+  };
+  collectRoutes(visibleItems);
+  const activeHref = findActiveRoute(allRoutes);
+
+  const mainItems = visibleItems.filter((item) => item.label !== "Administration");
+  const adminItem = visibleItems.find((item) => item.label === "Administration");
+
+  const renderNavGroup = (item: SidebarItemType) =>
+    item.children && item.children.length > 0 ? (
+      <SidebarGroup
+        key={item.href}
+        item={item}
+        activeHref={activeHref}
+        collapsed={collapsed}
+      />
+    ) : (
+      <SidebarItem
+        key={item.href}
+        item={item}
+        active={item.href === activeHref}
+        collapsed={collapsed}
+      />
+    );
+
+  const content = (
+    <div className="font-montserrat flex h-full flex-col bg-white">
+      {/* En-tête avec logo */}
+      <div
+        className={`flex items-center gap-2 px-4 pt-5 pb-4 ${
+          collapsed ? "justify-center" : "justify-between"
+        }`}
       >
-        {filteredNavigation.map((item) => {
-          const isActive = isActiveRoute(item.href);
-
-          if (item.children && item.children.length > 0) {
-            return (
-              <SidebarGroup
-                key={item.href}
-                item={item}
-                active={isActive}
-                collapsed={!isExpanded}
-              />
-            );
-          }
-
-          return (
-            <SidebarItem
-              key={item.href}
-              item={item}
-              active={isActive}
-              collapsed={!isExpanded}
-            />
-          );
-        })}
-      </nav>
-
-      <div className="mt-4 border-t border-white/10 pt-4">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className={`flex w-full items-center ${
-            isExpanded ? "justify-between" : "justify-center"
-          } rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-(--text-secondary) transition hover:bg-white/10`}
-          aria-label="Toggle theme"
-          title={
-            theme === "light" ? "Passer en mode sombre" : "Passer en mode clair"
-          }
-        >
-          <span
-            className={`flex items-center gap-2 ${!isExpanded && "justify-center"}`}
+        {!collapsed ? (
+          <div className="flex items-center gap-3 px-1">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white ring-1 ring-primary-dark/20 shadow-sm">
+              <span className="text-base font-black tracking-tight">L</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[16px] font-bold text-slate-800 tracking-tight">
+                AB APP
+              </span>
+              <span className="text-[10px] font-medium text-primary-dark/70">
+                Plateforme
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white ring-1 ring-primary-dark/20 shadow-sm">
+            <span className="text-base font-black tracking-tight">L</span>
+          </div>
+        )}
+        {!collapsed && (
+          <button
+            onClick={() => setPinned((p) => !p)}
+            className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all duration-200"
+            title="Réduire le menu"
+            aria-label="Réduire le menu"
           >
-            {theme === "light" ? (
-              <Moon className="h-4 w-4" />
-            ) : (
-              <Sun className="h-4 w-4" />
-            )}
-            {isExpanded && (
-              <span>{theme === "light" ? "Mode sombre" : "Mode clair"}</span>
-            )}
-          </span>
-          {isExpanded && (
-            <span className="text-xs uppercase tracking-wide text-(--text-tertiary)">
-              {theme === "light" ? "Dark" : "Light"}
-            </span>
-          )}
-        </button>
+            <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
-      <SidebarFooter collapsed={!isExpanded} />
+      {collapsed && (
+        <button
+          onClick={() => setPinned(true)}
+          className="hidden md:flex mx-auto mb-2 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all duration-200 rotate-180"
+          title="Déplier le menu"
+          aria-label="Déplier le menu"
+        >
+          <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
+        </button>
+      )}
+
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-2">
+        {/* Navigation principale */}
+        <div className="space-y-1">
+          {!collapsed && (
+            <div className="px-3 pb-2">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Navigation
+              </p>
+              <div className="mt-1 h-px bg-linear-to-r from-slate-200 to-transparent" />
+            </div>
+          )}
+          {mainItems.map(renderNavGroup)}
+        </div>
+
+        {/* Zone Administration */}
+        {adminItem && (
+          <div className="space-y-1">
+            {!collapsed && (
+              <div className="px-3 pb-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Administration
+                </p>
+                <div className="mt-1 h-px bg-linear-to-r from-slate-200 to-transparent" />
+              </div>
+            )}
+            {renderNavGroup(adminItem)}
+          </div>
+        )}
+      </nav>
+
+      <SidebarFooter collapsed={collapsed} />
     </div>
   );
 
   return (
-    <>
-      {/* Version Desktop - Sidebar collapsible */}
+    <div className="bg-white md:min-h-screen">
+      {/* Desktop */}
       <aside
-        className={`hidden md:block sticky top-5 h-fit shrink-0 rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-xl md:h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out ${
-          isExpanded ? "w-64" : "w-20"
-        }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-      >
-        {sidebarContent}
-      </aside>
-
-      {/* Version Mobile - Hamburger Menu */}
-      <div className="md:hidden fixed top-4 right-4 z-50">
-        <button
-          type="button"
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="rounded-full bg-white/10 p-3 backdrop-blur-xl border border-white/20 shadow-2xl hover:bg-white/20 transition-all duration-300"
-          aria-label={isMobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
-        >
-          {isMobileOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
-        </button>
-      </div>
-
-      {/* Mobile Drawer */}
-      <div
-        className={`md:hidden fixed inset-0 z-40 transition-all duration-300 ${
-          isMobileOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+        className={`hidden md:block sticky top-0 h-screen shrink-0 border-r border-slate-200/80 bg-white transition-all duration-300 ease-in-out ${
+          collapsed ? "w-18" : "w-72"
         }`}
       >
-        {/* Overlay */}
-        <div
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          onClick={() => setIsMobileOpen(false)}
-        />
+        {content}
+      </aside>
 
-        {/* Drawer */}
+      {/* Tiroir mobile */}
+      <div
+        className={`md:hidden fixed inset-0 z-50 ${mobileOpen ? "" : "pointer-events-none"}`}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div
+          onClick={onCloseMobile}
+          className={`absolute inset-0 bg-slate-900/50 backdrop-blur-md transition-all duration-300 ${
+            mobileOpen ? "opacity-100" : "opacity-0"
+          }`}
+        />
         <aside
-          className={`absolute top-0 right-0 h-full w-80 bg-white/10 backdrop-blur-xl border-l border-white/20 p-5 shadow-2xl transition-transform duration-300 ${
-            isMobileOpen ? "translate-x-0" : "translate-x-full"
+          className={`absolute top-0 left-0 h-full w-[320px] bg-white shadow-2xl transition-all duration-300 ease-out ${
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          {sidebarContent}
+          <div className="flex items-center justify-between border-b border-slate-200/60 px-4 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white ring-1 ring-primary-dark/20 shadow-sm">
+                <span className="text-sm font-black">L</span>
+              </div>
+              <span className="text-sm font-bold text-slate-800">AB APP</span>
+            </div>
+            <button
+              onClick={onCloseMobile}
+              className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Fermer le menu"
+            >
+              <X className="h-5 w-5" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="h-[calc(100%-60px)] overflow-y-auto">{content}</div>
         </aside>
       </div>
-    </>
+    </div>
   );
 }

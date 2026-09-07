@@ -36,16 +36,12 @@ export async function PATCH(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const existing = await postRepository.findBySlug(params.slug);
+    const existing = await postRepository.findBySlug(slug);
     if (!existing) throw new NotFoundException("Article non trouvé");
 
     const body = await req.json();
     const validated = UpdatePostSchema.parse(body);
-    const post = await postService.updatePost(
-      existing.id,
-      session.user.id,
-      validated,
-    );
+    const post = await postService.updatePost(existing.id, session.user.id, validated);
 
     return NextResponse.json(post);
   } catch (error) {

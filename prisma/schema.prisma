@@ -20,7 +20,6 @@ enum PostStatus {
 enum NotificationType {
   LIKE
   COMMENT
-  FOLLOW
   SHARE
 }
 
@@ -54,8 +53,6 @@ model User {
   comments      Comment[]
   likes         Like[]
   bookmarks     Bookmark[]
-  followers     Follow[]       @relation("following")
-  following     Follow[]       @relation("followers")
   notifications Notification[]
 
   @@map("users")
@@ -78,6 +75,23 @@ model Category {
   books    Book[]
 
   @@map("categories")
+}
+
+// ============================
+// EMISSION
+// ============================
+
+model Emission {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  podcasts Podcast[]
+
+  @@map("emissions")
 }
 
 model Tag {
@@ -129,6 +143,7 @@ model Post {
   @@index([categoryId])
   @@index([status])
   @@index([publishedAt])
+  @@index([status, publishedAt])
   @@map("posts")
 }
 
@@ -139,6 +154,7 @@ model PostTag {
   tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([postId, tagId])
+  @@index([tagId])
   @@map("post_tags")
 }
 
@@ -152,6 +168,7 @@ model Podcast {
   slug           String     @unique
   description    String?    @db.Text
   audioUrl       String     @map("audio_url")
+  mediaType      String     @default("AUDIO") @map("media_type")
   coverImage     String?    @map("cover_image")
   duration       Int
   transcript     String?    @db.Text
@@ -170,6 +187,9 @@ model Podcast {
   categoryId String?   @map("category_id")
   category   Category? @relation(fields: [categoryId], references: [id])
 
+  emissionId String?   @map("emission_id")
+  emission   Emission? @relation(fields: [emissionId], references: [id], onDelete: SetNull)
+
   tags      PodcastTag[]
   likes     Like[]
   comments  Comment[]
@@ -177,8 +197,10 @@ model Podcast {
 
   @@index([authorId])
   @@index([categoryId])
+  @@index([emissionId])
   @@index([status])
   @@index([publishedAt])
+  @@index([status, publishedAt])
   @@map("podcasts")
 }
 
@@ -227,6 +249,7 @@ model Book {
   @@index([authorId])
   @@index([categoryId])
   @@index([status])
+  @@index([status, publishedAt])
   @@map("books")
 }
 
@@ -328,27 +351,10 @@ model Bookmark {
   @@unique([userId, postId])
   @@unique([userId, podcastId])
   @@unique([userId, bookId])
+  @@index([postId])
+  @@index([podcastId])
+  @@index([bookId])
   @@map("bookmarks")
-}
-
-// ============================
-// FOLLOW
-// ============================
-
-model Follow {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now()) @map("created_at")
-
-  followerId String @map("follower_id")
-  follower   User   @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
-
-  followingId String @map("following_id")
-  following   User   @relation("followers", fields: [followingId], references: [id], onDelete: Cascade)
-
-  @@unique([followerId, followingId])
-  @@index([followerId])
-  @@index([followingId])
-  @@map("follows")
 }
 
 // ============================

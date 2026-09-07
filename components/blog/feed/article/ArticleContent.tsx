@@ -14,7 +14,11 @@ export default function ArticleContent({ activePost }: ArticleContentProps) {
     return parts.map((part, index) => {
       if (/^\*\*.+\*\*$/.test(part)) {
         return (
-          <strong key={`${part}-${index}`} className="font-semibold">
+          <strong
+            key={`${part}-${index}`}
+            className="font-semibold"
+            style={{ color: "var(--ra-ink)" }}
+          >
             {part.slice(2, -2)}
           </strong>
         );
@@ -33,27 +37,28 @@ export default function ArticleContent({ activePost }: ArticleContentProps) {
   };
 
   const renderContent = (content?: string) => {
-    const text =
-      typeof content === "string" ? content : content ? String(content) : "";
+    const text = typeof content === "string" ? content : content ? String(content) : "";
     const lines = text.split("\n");
     const elements: Array<React.ReactNode> = [];
     let listItems: string[] = [];
+    let paragraphCount = 0;
 
     const flushList = () => {
       if (listItems.length === 0) return;
 
       elements.push(
-        <ul
-          key={`list-${elements.length}`}
-          className="mb-4 ml-6 list-disc space-y-2"
-        >
+        <ul key={`list-${elements.length}`} className="mb-5 ml-5 space-y-2">
           {listItems.map((item, index) => (
             <li
               key={`${item}-${index}`}
-              className="leading-relaxed"
-              style={{ color: "var(--text-secondary)" }}
+              className="leading-relaxed flex gap-2"
+              style={{ color: "var(--ra-ink-soft)" }}
             >
-              {renderInlineMarkdown(item)}
+              <span
+                className="mt-2 w-1 h-1 rounded-full shrink-0"
+                style={{ backgroundColor: "var(--ra-amber)" }}
+              />
+              <span>{renderInlineMarkdown(item)}</span>
             </li>
           ))}
         </ul>,
@@ -67,8 +72,8 @@ export default function ArticleContent({ activePost }: ArticleContentProps) {
         elements.push(
           <h2
             key={`h2-${index}`}
-            className="text-2xl font-bold mt-8 mb-4"
-            style={{ color: "var(--text-primary)" }}
+            className="font-serif text-2xl mt-10 mb-4 pb-2 border-b"
+            style={{ color: "var(--ra-ink)", borderColor: "var(--ra-rule)" }}
           >
             {renderInlineMarkdown(line.slice(3))}
           </h2>,
@@ -81,8 +86,8 @@ export default function ArticleContent({ activePost }: ArticleContentProps) {
         elements.push(
           <h3
             key={`h3-${index}`}
-            className="text-xl font-semibold mt-6 mb-3"
-            style={{ color: "var(--text-primary)" }}
+            className="font-mono text-xs uppercase tracking-widest font-bold mt-8 mb-3"
+            style={{ color: "var(--ra-amber)" }}
           >
             {renderInlineMarkdown(line.slice(4))}
           </h3>,
@@ -95,10 +100,10 @@ export default function ArticleContent({ activePost }: ArticleContentProps) {
         elements.push(
           <blockquote
             key={`quote-${index}`}
-            className="border-l-4 pl-4 my-4 italic"
+            className="pl-5 my-6 italic font-serif text-lg leading-relaxed"
             style={{
-              borderColor: "var(--accent)",
-              color: "var(--text-secondary)",
+              borderLeft: "3px double var(--ra-bordeaux)",
+              color: "var(--ra-ink-soft)",
             }}
           >
             {renderInlineMarkdown(line.slice(2))}
@@ -115,15 +120,22 @@ export default function ArticleContent({ activePost }: ArticleContentProps) {
       flushList();
 
       if (!line.trim()) {
-        elements.push(<div key={`sp-${index}`} className="h-4" />);
+        elements.push(<div key={`sp-${index}`} className="h-2" />);
         return;
       }
+
+      paragraphCount += 1;
+      const isFirst = paragraphCount === 1;
 
       elements.push(
         <p
           key={`p-${index}`}
-          className="mb-4 leading-relaxed"
-          style={{ color: "var(--text-secondary)" }}
+          className={`mb-4 leading-[1.8] font-serif text-[15px] md:text-base ${
+            isFirst
+              ? "first-letter:text-5xl first-letter:font-semibold first-letter:mr-1 first-letter:float-left first-letter:leading-[0.85] first-letter:text-(--ra-bordeaux)"
+              : ""
+          }`}
+          style={{ color: "var(--ra-ink-soft)" }}
         >
           {renderInlineMarkdown(line)}
         </p>,
@@ -137,37 +149,41 @@ export default function ArticleContent({ activePost }: ArticleContentProps) {
   return (
     <div
       id="article-markdown-body"
-      className="frosted-glass rounded-3xl p-6 md:p-12"
-      style={{ backgroundColor: "var(--bg-secondary)" }}
+      className="rounded-sm border p-6 md:p-12"
+      style={{ backgroundColor: "var(--ra-paper)", borderColor: "var(--ra-rule)" }}
     >
-      <div className="markdown-body text-sm md:text-base leading-relaxed">
-        {renderContent(activePost.content)}
-      </div>
+      <div className="markdown-body">{renderContent(activePost.content)}</div>
 
       {activePost.tags && activePost.tags.length > 0 && (
-        <div
-          className="mt-12 pt-8 border-t flex flex-wrap gap-2"
-          style={{ borderColor: "var(--border)" }}
-        >
-          {activePost.tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-3 py-1 border rounded-lg text-xs cursor-pointer font-mono uppercase tracking-widest transition-colors"
-              style={{
-                backgroundColor: "var(--bg-tertiary)",
-                borderColor: "var(--border)",
-                color: "var(--text-tertiary)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "var(--text-primary)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "var(--text-tertiary)";
-              }}
-            >
-              #{tag}
-            </span>
-          ))}
+        <div className="mt-12 pt-6 border-t" style={{ borderColor: "var(--ra-rule)" }}>
+          <p
+            className="font-mono text-[10px] uppercase tracking-widest mb-3"
+            style={{ color: "var(--ra-ink-soft)" }}
+          >
+            Mots-clés indexés
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {activePost.tags.map((tag) => (
+              <span
+                key={tag}
+                className="px-2.5 py-1 border text-[11px] cursor-pointer font-mono uppercase tracking-wider transition-colors"
+                style={{
+                  borderColor: "var(--ra-rule-strong)",
+                  color: "var(--ra-ink-soft)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--ra-amber)";
+                  e.currentTarget.style.borderColor = "var(--ra-amber)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--ra-ink-soft)";
+                  e.currentTarget.style.borderColor = "var(--ra-rule-strong)";
+                }}
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

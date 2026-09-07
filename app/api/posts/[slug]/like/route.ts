@@ -21,7 +21,8 @@ export async function POST(
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
-    const post = await postRepository.findBySlug(params.slug);
+    const { slug } = await params;
+    const post = await postRepository.findBySlug(slug);
     if (!post) throw new NotFoundException("Publication non trouvée");
 
     const liked = await interactionService.toggleLike(
@@ -41,7 +42,8 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const post = await postRepository.findBySlug(params.slug);
+    const { slug } = await params;
+    const post = await postRepository.findBySlug(slug);
     if (!post) throw new NotFoundException("Publication non trouvée");
 
     const url = new URL(req.url);

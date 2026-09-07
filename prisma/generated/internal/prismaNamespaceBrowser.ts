@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Category: 'Category',
+  Emission: 'Emission',
   Tag: 'Tag',
   Post: 'Post',
   PostTag: 'PostTag',
@@ -63,7 +64,6 @@ export const ModelName = {
   Comment: 'Comment',
   Like: 'Like',
   Bookmark: 'Bookmark',
-  Follow: 'Follow',
   Notification: 'Notification'
 } as const
 
@@ -114,6 +114,18 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const EmissionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmissionScalarFieldEnum = (typeof EmissionScalarFieldEnum)[keyof typeof EmissionScalarFieldEnum]
+
+
 export const TagScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -161,6 +173,7 @@ export const PodcastScalarFieldEnum = {
   slug: 'slug',
   description: 'description',
   audioUrl: 'audioUrl',
+  mediaType: 'mediaType',
   coverImage: 'coverImage',
   duration: 'duration',
   transcript: 'transcript',
@@ -173,7 +186,8 @@ export const PodcastScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   authorId: 'authorId',
-  categoryId: 'categoryId'
+  categoryId: 'categoryId',
+  emissionId: 'emissionId'
 } as const
 
 export type PodcastScalarFieldEnum = (typeof PodcastScalarFieldEnum)[keyof typeof PodcastScalarFieldEnum]
@@ -194,6 +208,7 @@ export const BookScalarFieldEnum = {
   synopsis: 'synopsis',
   price: 'price',
   coverImage: 'coverImage',
+  fileUrl: 'fileUrl',
   status: 'status',
   downloadCount: 'downloadCount',
   likesCount: 'likesCount',
@@ -259,16 +274,6 @@ export const BookmarkScalarFieldEnum = {
 export type BookmarkScalarFieldEnum = (typeof BookmarkScalarFieldEnum)[keyof typeof BookmarkScalarFieldEnum]
 
 
-export const FollowScalarFieldEnum = {
-  id: 'id',
-  createdAt: 'createdAt',
-  followerId: 'followerId',
-  followingId: 'followingId'
-} as const
-
-export type FollowScalarFieldEnum = (typeof FollowScalarFieldEnum)[keyof typeof FollowScalarFieldEnum]
-
-
 export const NotificationScalarFieldEnum = {
   id: 'id',
   type: 'type',
@@ -327,6 +332,16 @@ export const CategoryOrderByRelevanceFieldEnum = {
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
 
 
+export const EmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description'
+} as const
+
+export type EmissionOrderByRelevanceFieldEnum = (typeof EmissionOrderByRelevanceFieldEnum)[keyof typeof EmissionOrderByRelevanceFieldEnum]
+
+
 export const TagOrderByRelevanceFieldEnum = {
   id: 'id',
   name: 'name',
@@ -365,10 +380,12 @@ export const PodcastOrderByRelevanceFieldEnum = {
   slug: 'slug',
   description: 'description',
   audioUrl: 'audioUrl',
+  mediaType: 'mediaType',
   coverImage: 'coverImage',
   transcript: 'transcript',
   authorId: 'authorId',
-  categoryId: 'categoryId'
+  categoryId: 'categoryId',
+  emissionId: 'emissionId'
 } as const
 
 export type PodcastOrderByRelevanceFieldEnum = (typeof PodcastOrderByRelevanceFieldEnum)[keyof typeof PodcastOrderByRelevanceFieldEnum]
@@ -388,6 +405,7 @@ export const BookOrderByRelevanceFieldEnum = {
   slug: 'slug',
   synopsis: 'synopsis',
   coverImage: 'coverImage',
+  fileUrl: 'fileUrl',
   authorId: 'authorId',
   categoryId: 'categoryId'
 } as const
@@ -437,15 +455,6 @@ export const BookmarkOrderByRelevanceFieldEnum = {
 } as const
 
 export type BookmarkOrderByRelevanceFieldEnum = (typeof BookmarkOrderByRelevanceFieldEnum)[keyof typeof BookmarkOrderByRelevanceFieldEnum]
-
-
-export const FollowOrderByRelevanceFieldEnum = {
-  id: 'id',
-  followerId: 'followerId',
-  followingId: 'followingId'
-} as const
-
-export type FollowOrderByRelevanceFieldEnum = (typeof FollowOrderByRelevanceFieldEnum)[keyof typeof FollowOrderByRelevanceFieldEnum]
 
 
 export const NotificationOrderByRelevanceFieldEnum = {

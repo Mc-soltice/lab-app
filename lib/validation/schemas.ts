@@ -41,14 +41,12 @@ export const CreatePodcastSchema = z.object({
   title: z.string().min(3).max(200),
   description: z.string().optional().default(""),
   audioUrl: z.string().trim().url("L'URL audio est requise"),
+  mediaType: z.enum(["AUDIO", "VIDEO"]).default("AUDIO"),
   coverImage: z.string().optional().default(""),
-  duration: z
-    .number()
-    .int()
-    .positive()
-    .min(30, "La durée minimale est de 30 secondes"),
+  duration: z.number().int().positive().min(30, "La durée minimale est de 30 secondes"),
   transcript: z.string().optional().default(""),
   categoryId: z.string().optional().default(""),
+  emissionId: z.string().cuid().optional().or(z.literal("")),
   tags: z.array(z.string()).optional().default([]),
   status: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
 });
@@ -106,9 +104,7 @@ export const LikeTargetSchema = z
   .object({ type: LikeableTypeSchema, id: z.string().cuid() })
   .or(z.object({ targetType: LikeableTypeSchema, targetId: z.string().cuid() }))
   .transform((value) =>
-    "targetType" in value
-      ? { type: value.targetType, id: value.targetId }
-      : value,
+    "targetType" in value ? { type: value.targetType, id: value.targetId } : value,
   );
 
 export const BookmarkTargetSchema = z
@@ -120,9 +116,7 @@ export const BookmarkTargetSchema = z
     }),
   )
   .transform((value) =>
-    "targetType" in value
-      ? { type: value.targetType, id: value.targetId }
-      : value,
+    "targetType" in value ? { type: value.targetType, id: value.targetId } : value,
   );
 
 // ============================
@@ -167,6 +161,13 @@ export const CreateCategorySchema = z.object({
 
 export const UpdateCategorySchema = CreateCategorySchema.partial();
 
+export const CreateEmissionSchema = z.object({
+  title: z.string().min(2).max(200),
+  description: z.string().max(2000).optional(),
+});
+
+export const UpdateEmissionSchema = CreateEmissionSchema.partial();
+
 export const CreateTagSchema = z.object({
   name: z.string().min(2).max(50),
   description: z.string().max(300).optional(),
@@ -178,9 +179,7 @@ export const CreateTagSchema = z.object({
 
 export const SearchSchema = z.object({
   q: z.string().min(1),
-  type: z
-    .enum(["all", "posts", "podcasts", "books", "users", "tags"])
-    .default("all"),
+  type: z.enum(["all", "posts", "podcasts", "books", "users", "tags"]).default("all"),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(10),
 });

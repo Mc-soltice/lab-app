@@ -150,7 +150,6 @@ export function useSavedPosts(
             interactionState: {
               isLiked: false, // Sera mis à jour par un autre appel si nécessaire
               isBookmarked: true,
-              isFollowing: false,
             },
             bookmarkId: bookmark.id,
           };

@@ -1,4 +1,4 @@
-// components/blog/feed/article/ArticleActionBar.tsx
+// components/blog/article/ArticleActionBar.tsx
 "use client";
 
 import { Bookmark, Heart, Share2 } from "lucide-react";
@@ -23,37 +23,41 @@ export default function ArticleActionBar({
   const isSaved = savedPosts.includes(activePost.id);
 
   return (
-    <div className="flex items-center gap-4 text-xs font-mono">
+    <div className="flex items-center gap-3 font-mono text-[11px]">
       <button
         id="article-like-counter-btn"
         onClick={() => handleLikePost(activePost.id)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl frosted-glass transition-all ${
-          isLiked
-            ? "text-red-400 bg-red-500/10 border-red-500/20"
-            : "text-white/60 hover:text-white"
-        }`}
+        className="flex items-center gap-2 px-3.5 py-2 border-2 rounded-sm uppercase tracking-wider font-semibold transition-all"
+        style={{
+          borderColor: isLiked ? "var(--ra-bordeaux)" : "var(--ra-rule)",
+          color: isLiked ? "var(--ra-bordeaux)" : "var(--ra-ink-soft)",
+          backgroundColor: isLiked ? "rgba(124,43,50,0.06)" : "transparent",
+          transform: isLiked ? "rotate(-1deg)" : "none",
+        }}
       >
         <Heart
-          className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
+          className="w-3.5 h-3.5"
+          style={{ fill: isLiked ? "var(--ra-bordeaux)" : "none" }}
         />
-        <span>{activePost.likesCount + (isLiked ? 1 : 0)}</span>
+        {activePost.likesCount + (isLiked ? 1 : 0)}
       </button>
 
       <button
         id="article-save-counter-btn"
         onClick={() => handleSavePost(activePost.id)}
-        className={`px-2 py-2 rounded-xl frosted-glass transition-all ${
-          isSaved ? "border-(--accent)/20" : "text-white/60 hover:text-white"
-        }`}
+        className="flex items-center gap-2 px-3.5 py-2 border-2 rounded-sm uppercase tracking-wider font-semibold transition-all"
         style={{
-          backgroundColor: isSaved ? "var(--bg-tertiary)" : "transparent",
-          color: isSaved ? "var(--accent)" : "",
-          borderColor: isSaved ? "var(--accent)" : "transparent",
+          borderColor: isSaved ? "var(--ra-green)" : "var(--ra-rule)",
+          color: isSaved ? "var(--ra-green)" : "var(--ra-ink-soft)",
+          backgroundColor: isSaved ? "rgba(32,67,49,0.06)" : "transparent",
+          transform: isSaved ? "rotate(1deg)" : "none",
         }}
       >
         <Bookmark
-          className={`flex w-4 h-4 ${isSaved ? "fill-(--accent) text-(--accent)" : ""}`}
+          className="w-3.5 h-3.5"
+          style={{ fill: isSaved ? "var(--ra-green)" : "none" }}
         />
+        {isSaved ? "Archivé" : "Archiver"}
       </button>
 
       <button
@@ -66,9 +70,11 @@ export default function ArticleActionBar({
             });
           }
         }}
-        className="px-4 py-2 rounded-xl frosted-glass transition-all text-white/60 hover:text-white"
+        className="flex items-center gap-2 px-3.5 py-2 border-2 rounded-sm uppercase tracking-wider font-semibold transition-all"
+        style={{ borderColor: "var(--ra-rule)", color: "var(--ra-ink-soft)" }}
       >
-        <Share2 className="w-4 h-4" />
+        <Share2 className="w-3.5 h-3.5" />
+        Partager
       </button>
     </div>
   );
