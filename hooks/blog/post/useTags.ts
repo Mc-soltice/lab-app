@@ -1,6 +1,7 @@
 // hooks/blog/useTags.ts
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { toError } from "@/lib/error-utils";
 
 export interface Tag {
   id: string;
@@ -11,7 +12,7 @@ export interface Tag {
 }
 
 interface UseTagsOptions {
-  onError?: (error: any) => void;
+  onError?: (error: Error) => void;
 }
 
 export function useTags(options: UseTagsOptions = {}) {
@@ -34,12 +35,11 @@ export function useTags(options: UseTagsOptions = {}) {
       }
       const data = await response.json();
       setTags(data.data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const normalizedError = toError(error, "Erreur lors du chargement des tags");
       console.error("Erreur fetchTags:", error);
-      setError(error.message);
-      if (onError) {
-        onError(error);
-      }
+      setError(normalizedError.message);
+      onError?.(normalizedError);
       toast.error("Erreur lors du chargement des tags");
     } finally {
       setIsLoading(false);
@@ -88,13 +88,15 @@ export function useTags(options: UseTagsOptions = {}) {
         setTags((prev) => [...prev, newTag]);
         toast.success(`Tag "${trimmedName}" créé avec succès`);
         return newTag;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const normalizedError = toError(
+          error,
+          "Erreur lors de la création du tag",
+        );
         console.error("Erreur createTag:", error);
-        setError(error.message);
-        if (onError) {
-          onError(error);
-        }
-        toast.error(error.message || "Erreur lors de la création du tag");
+        setError(normalizedError.message);
+        onError?.(normalizedError);
+        toast.error(normalizedError.message);
         return null;
       } finally {
         setIsCreating(false);

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { toError } from "@/lib/error-utils";
 
 export interface Emission {
   id: string;
@@ -11,7 +12,7 @@ export interface Emission {
 }
 
 interface UseEmissionsOptions {
-  onError?: (error: any) => void;
+  onError?: (error: Error) => void;
 }
 
 export function useEmissions(options: UseEmissionsOptions = {}) {
@@ -33,12 +34,14 @@ export function useEmissions(options: UseEmissionsOptions = {}) {
       }
       const data = await response.json();
       setEmissions(data.data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const normalizedError = toError(
+        error,
+        "Erreur lors du chargement des émissions",
+      );
       console.error("Erreur fetchEmissions:", error);
-      setError(error.message);
-      if (onError) {
-        onError(error);
-      }
+      setError(normalizedError.message);
+      onError?.(normalizedError);
       toast.error("Erreur lors du chargement des émissions");
     } finally {
       setIsLoading(false);
@@ -85,13 +88,15 @@ export function useEmissions(options: UseEmissionsOptions = {}) {
         setEmissions((prev) => [...prev, newEmission]);
         toast.success(`Émission "${trimmedTitle}" créée avec succès`);
         return newEmission;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const normalizedError = toError(
+          error,
+          "Erreur lors de la création de l'émission",
+        );
         console.error("Erreur createEmission:", error);
-        setError(error.message);
-        if (onError) {
-          onError(error);
-        }
-        toast.error(error.message || "Erreur lors de la création de l'émission");
+        setError(normalizedError.message);
+        onError?.(normalizedError);
+        toast.error(normalizedError.message);
         return null;
       } finally {
         setIsCreating(false);

@@ -1,21 +1,16 @@
 // app/post/enregistrement/page.tsx
 "use client";
 
-import ArticleCard from "@/components/ui/ArticleCard";
+import ArticleCard from "@/components/blog/post/ArticleCard";
 import { useSavedPosts } from "@/hooks/blog/post/useSavedPosts";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-const ACCENT = "#A5A0E8"; // périwinkle
-const ACCENT_WARM = "#FFBE98"; // peach fuzz
-
 export default function SavedPostsPage() {
-  const { posts, isLoading, hasMore, loadMore, refresh, total } = useSavedPosts(
-    {
-      limit: 10,
-      onError: (error) => console.error(error),
-    },
-  );
+  const { posts, isLoading, hasMore, loadMore, refresh, total } = useSavedPosts({
+    limit: 10,
+    onError: (error) => console.error(error),
+  });
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -93,8 +88,7 @@ export default function SavedPostsPage() {
             Votre pile de lecture est vide
           </p>
           <p className="text-neutral-400 text-sm font-['DM_Sans'] max-w-sm mx-auto">
-            Parcourez le feed et enregistrez les articles qui méritent d'être
-            relus.
+            Parcourez le feed et enregistrez les articles qui méritent d&apos;être relus.
           </p>
         </div>
       ) : (
@@ -124,7 +118,7 @@ export default function SavedPostsPage() {
               borderColor: "rgba(165,160,232,0.3)",
             }}
           >
-            Charger plus d'articles
+            Charger plus d&apos;articles
           </button>
         </div>
       )}

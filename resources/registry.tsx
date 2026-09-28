@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ResourceDefinition } from "./types";
 
 const statusFilters = [
@@ -23,11 +24,14 @@ const authorColumn = {
   render: (item: any) => (
     <div className="flex items-center gap-2">
       {item.author?.avatar ? (
-        <img
-          src={item.author.avatar}
-          alt={item.author.username}
-          className="w-6 h-6 rounded-full object-cover"
-        />
+        <div className="relative h-6 w-6 overflow-hidden rounded-full">
+          <Image
+            src={item.author.avatar}
+            alt={item.author.username}
+            fill
+            className="object-cover"
+          />
+        </div>
       ) : (
         <div className="w-6 h-6 rounded-full bg-(--bg-tertiary) flex items-center justify-center">
           <span className="text-xs text-(--text-tertiary)">

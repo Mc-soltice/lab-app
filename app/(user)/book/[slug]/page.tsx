@@ -49,7 +49,6 @@ export default function BookDetailPage() {
     isBookmarking,
     toggleLike,
     toggleBookmark,
-    canInteract,
   } = useInteractions({
     targetId: book?.id || "",
     targetType: "book",

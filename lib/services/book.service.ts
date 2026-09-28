@@ -1,9 +1,14 @@
 // lib/services/book.service.ts
 import type { Prisma } from "@/prisma/generated/client";
+import type {
+  BookServiceReadDto,
+  BooksListResponseDto,
+  CreateBookDto,
+  UpdateBookDto,
+} from "@/types/book";
+import type { PostStatus } from "@/types/post";
 import slugify from "slugify";
-import { z } from "zod";
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   NotFoundException,
@@ -12,67 +17,9 @@ import { BookRepository } from "../repositories/book.repository";
 import { CategoryRepository } from "../repositories/category.repository";
 import { TagRepository } from "../repositories/tag.repository";
 import { UserRepository } from "../repositories/user.repository";
-import { CreateBookSchema, UpdateBookSchema } from "../validation/schemas";
 
-export interface BookWithRelations {
-  id: string;
-  title: string;
-  slug: string;
-  synopsis: string | null;
-  price: number | null;
-  coverImage: string | null;
-  fileUrl: string | null;
-  status: string;
-  downloadCount: number;
-  likesCount: number;
-  commentsCount: number;
-  bookmarksCount: number;
-  publishedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  authorId: string;
-  categoryId: string | null;
-  author: {
-    id: string;
-    username: string;
-    firstName?: string | null;
-    lastName?: string | null;
-    avatar?: string | null;
-  };
-  category?: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  tags?: Array<{
-    id: string;
-    name: string;
-    slug: string;
-  }>;
-  chapters?: Array<{
-    id: string;
-    title: string;
-    order: number;
-    publishedAt?: Date | null;
-  }>;
-  _count?: {
-    likes: number;
-    comments: number;
-    bookmarks: number;
-  };
-  interactionState?: {
-    isLiked?: boolean;
-    isBookmarked?: boolean;
-  };
-}
-
-export interface BooksListResponse {
-  books: BookWithRelations[];
-  total: number;
-  totalPages: number;
-  page: number;
-  limit: number;
-}
+export type BookWithRelations = BookServiceReadDto;
+export type BooksListResponse = BooksListResponseDto;
 
 export async function getBooks(
   options: {
@@ -80,7 +27,7 @@ export async function getBooks(
     limit?: number;
     search?: string;
     category?: string;
-    status?: string;
+    status?: PostStatus;
     userId?: string;
     sortBy?: "recent" | "popular" | "downloads" | "price";
     order?: "asc" | "desc";
@@ -101,10 +48,7 @@ export class BookService {
   /**
    * Créer un nouveau livre
    */
-  async createBook(
-    authorId: string,
-    data: z.infer<typeof CreateBookSchema>,
-  ): Promise<BookWithRelations> {
+  async createBook(authorId: string, data: CreateBookDto): Promise<BookWithRelations> {
     // Vérifier l'utilisateur
     const user = await this.userRepository.findById(authorId);
     if (!user) throw new NotFoundException("Utilisateur non trouvé");
@@ -143,7 +87,7 @@ export class BookService {
           }
         : undefined,
       ...(data.price !== undefined ? { price: data.price } : {}),
-    } as Prisma.BookCreateInput & Record<string, unknown>;
+    } satisfies Prisma.BookCreateInput;
 
     // Créer le livre
     const book = await this.bookRepository.create(bookData);
@@ -210,23 +154,15 @@ export class BookService {
       interactionState = await this.bookRepository.getUserInteractions(id, userId);
     }
 
-    const normalizedBook = {
-      ...(book as Record<string, unknown>),
-      author: (book as any).author ?? {
-        id: "",
-        username: "",
-        firstName: null,
-        lastName: null,
-        avatar: null,
-      },
-      category: (book as any).category ?? null,
-      tags: (book as any).tags ?? [],
-      price: book.price ? Number(book.price) : null,
+    const normalizedBook: BookWithRelations = {
+      ...book,
+      tags: book.tags.map(({ tag }) => tag),
+      price: book.price === null ? null : Number(book.price),
       likesCount: stats.likes,
       commentsCount: stats.comments,
       bookmarksCount: stats.bookmarks,
       interactionState,
-    } as BookWithRelations;
+    };
 
     return normalizedBook;
   }
@@ -239,7 +175,7 @@ export class BookService {
     limit?: number;
     search?: string;
     category?: string;
-    status?: string;
+    status?: PostStatus;
     userId?: string;
     sortBy?: "recent" | "popular" | "downloads" | "price";
     order?: "asc" | "desc";
@@ -263,7 +199,7 @@ export class BookService {
 
     // Construire la requête
     const where: Prisma.BookWhereInput = {
-      status: status as any,
+      status,
       ...(search && {
         OR: [
           { title: { contains: search } },
@@ -335,7 +271,7 @@ export class BookService {
 
     // Formater les livres avec leurs statistiques
     const booksWithStats = await Promise.all(
-      books.map(async (book: any) => {
+      books.map(async (book) => {
         const stats = await this.bookRepository.getStats(book.id);
         let interactionState = undefined;
         if (userId) {
@@ -347,21 +283,13 @@ export class BookService {
 
         return {
           ...book,
-          author: book.author ?? {
-            id: "",
-            username: "",
-            firstName: null,
-            lastName: null,
-            avatar: null,
-          },
-          category: book.category ?? null,
-          tags: book.tags?.map((t: any) => t.tag) || [],
-          price: book.price ? Number(book.price) : null,
+          tags: book.tags.map(({ tag }) => tag),
+          price: book.price === null ? null : Number(book.price),
           likesCount: stats.likes,
           commentsCount: stats.comments,
           bookmarksCount: stats.bookmarks,
           interactionState,
-        } as BookWithRelations;
+        } satisfies BookWithRelations;
       }),
     );
 
@@ -380,7 +308,7 @@ export class BookService {
   async updateBook(
     id: string,
     userId: string,
-    data: z.infer<typeof UpdateBookSchema>,
+    data: UpdateBookDto,
   ): Promise<BookWithRelations> {
     const book = await this.bookRepository.findById(id);
     if (!book) {
@@ -391,22 +319,17 @@ export class BookService {
       throw new ForbiddenException("Vous n'êtes pas autorisé à modifier ce livre");
     }
 
-    // Si le titre change, mettre à jour le slug
+    let updatedSlug: string | undefined;
     if (data.title && data.title !== book.title) {
-      const slug = slugify(data.title, {
+      updatedSlug = slugify(data.title, {
         lower: true,
         strict: true,
         trim: true,
       });
-      const existing = await this.bookRepository.findBySlug(slug);
+      const existing = await this.bookRepository.findBySlug(updatedSlug);
       if (existing && existing.id !== id) {
         throw new ConflictException("Un livre avec ce titre existe déjà");
       }
-      const updatePayload = {
-        ...(data as Record<string, unknown>),
-        slug,
-      } as Record<string, unknown>;
-      data = updatePayload as z.infer<typeof UpdateBookSchema>;
     }
 
     // Si la catégorie change, vérifier qu'elle existe
@@ -418,9 +341,18 @@ export class BookService {
     }
 
     // Si le statut passe à PUBLISHED, définir la date de publication
-    const updateData = {
-      ...(data as Record<string, unknown>),
-    } as Prisma.BookUpdateInput;
+    const updateData: Prisma.BookUpdateInput = {
+      title: data.title,
+      synopsis: data.synopsis,
+      coverImage: data.coverImage,
+      fileUrl: data.fileUrl,
+      price: data.price,
+      status: data.status,
+      ...(updatedSlug ? { slug: updatedSlug } : {}),
+      ...(data.categoryId
+        ? { category: { connect: { id: data.categoryId } } }
+        : {}),
+    };
     if (data.status === "PUBLISHED" && book.status !== "PUBLISHED") {
       updateData.publishedAt = new Date();
     }
@@ -514,24 +446,16 @@ export class BookService {
     const result = await this.bookRepository.search(query, page, limit);
 
     const booksWithStats = await Promise.all(
-      result.data.map(async (book: any) => {
+      result.data.map(async (book) => {
         const stats = await this.bookRepository.getStats(book.id);
         return {
           ...book,
-          author: book.author ?? {
-            id: "",
-            username: "",
-            firstName: null,
-            lastName: null,
-            avatar: null,
-          },
-          category: book.category ?? null,
-          tags: book.tags ?? [],
-          price: book.price ? Number(book.price) : null,
+          tags: book.tags.map(({ tag }) => tag),
+          price: book.price === null ? null : Number(book.price),
           likesCount: stats.likes,
           commentsCount: stats.comments,
           bookmarksCount: stats.bookmarks,
-        } as BookWithRelations;
+        } satisfies BookWithRelations;
       }),
     );
 
@@ -552,7 +476,7 @@ export class BookService {
     options: {
       page?: number;
       limit?: number;
-      status?: string;
+      status?: PostStatus;
       userId?: string;
     } = {},
   ): Promise<BooksListResponse> {
@@ -560,7 +484,7 @@ export class BookService {
 
     const where: Prisma.BookWhereInput = {
       authorId,
-      status: status as any,
+      status,
     };
 
     // Si l'utilisateur n'est pas l'auteur, ne montrer que les livres publiés
@@ -608,7 +532,7 @@ export class BookService {
     ]);
 
     const booksWithStats = await Promise.all(
-      books.map(async (book: any) => {
+      books.map(async (book) => {
         const stats = await this.bookRepository.getStats(book.id);
         let interactionState = undefined;
         if (userId) {
@@ -620,21 +544,13 @@ export class BookService {
 
         return {
           ...book,
-          author: book.author ?? {
-            id: "",
-            username: "",
-            firstName: null,
-            lastName: null,
-            avatar: null,
-          },
-          category: book.category ?? null,
-          tags: book.tags?.map((t: any) => t.tag) || [],
-          price: book.price ? Number(book.price) : null,
+          tags: book.tags.map(({ tag }) => tag),
+          price: book.price === null ? null : Number(book.price),
           likesCount: stats.likes,
           commentsCount: stats.comments,
           bookmarksCount: stats.bookmarks,
           interactionState,
-        } as BookWithRelations;
+        } satisfies BookWithRelations;
       }),
     );
 
@@ -676,24 +592,16 @@ export class BookService {
     });
 
     return Promise.all(
-      books.map(async (book: any) => {
+      books.map(async (book) => {
         const stats = await this.bookRepository.getStats(book.id);
         return {
           ...book,
-          author: book.author ?? {
-            id: "",
-            username: "",
-            firstName: null,
-            lastName: null,
-            avatar: null,
-          },
-          category: book.category ?? null,
-          tags: book.tags ?? [],
-          price: book.price ? Number(book.price) : null,
+          tags: [],
+          price: book.price === null ? null : Number(book.price),
           likesCount: stats.likes,
           commentsCount: stats.comments,
           bookmarksCount: stats.bookmarks,
-        } as BookWithRelations;
+        } satisfies BookWithRelations;
       }),
     );
   }

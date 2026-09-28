@@ -5,6 +5,7 @@ import { usePodcastDetail } from "@/hooks/blog/podcast/usePodcastDetail";
 import { motion } from "framer-motion";
 import { BouncyArc } from "ldrs/react";
 import { Bookmark, Heart, MessageCircle, Pause, Play, User } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -12,7 +13,7 @@ import toast from "react-hot-toast";
 export default function PodcastDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuthContext();
+  void useAuthContext();
   const slug = params.slug as string;
 
   const [commentText, setCommentText] = useState("");
@@ -198,11 +199,14 @@ export default function PodcastDetailPage() {
             <div className="space-y-4">
               <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
                 {podcast.coverImage ? (
-                  <img
-                    src={podcast.coverImage}
-                    alt={podcast.title}
-                    className="h-64 w-full object-cover"
-                  />
+                  <div className="relative h-64 w-full">
+                    <Image
+                      src={podcast.coverImage}
+                      alt={podcast.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 ) : (
                   <div className="flex h-64 items-center justify-center bg-linear-to-br from-blue-600/40 to-purple-600/40">
                     <Play className="h-16 w-16 text-white/80" />
@@ -213,11 +217,14 @@ export default function PodcastDetailPage() {
               <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/10 p-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
                   {author?.avatar ? (
-                    <img
-                      src={author.avatar}
-                      alt={authorDisplayName}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
+                    <div className="relative h-10 w-10 overflow-hidden rounded-full">
+                      <Image
+                        src={author.avatar}
+                        alt={authorDisplayName}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                   ) : (
                     <User className="h-5 w-5" />
                   )}
@@ -259,7 +266,7 @@ export default function PodcastDetailPage() {
             <video
               controls
               src={podcast.audioUrl}
-              className="max-h-[32rem] w-full rounded-2xl"
+              className="max-h-128 w-full rounded-2xl"
               preload="metadata"
             />
           ) : (

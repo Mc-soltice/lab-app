@@ -367,8 +367,8 @@ const AboutPage = () => {
                 Libres, Authentiques et Belles
               </h1>
               <p className="text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Découvrez l'histoire de BAL & Virtuose Pro, une plateforme née
-                de la conviction que chaque femme mérite d'être accompagnée dans
+                Découvrez l&apos;histoire de BAL &amp; Virtuose Pro, une plateforme née
+                de la conviction que chaque femme mérite d&apos;être accompagnée dans
                 son épanouissement personnel et professionnel.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
@@ -383,7 +383,7 @@ const AboutPage = () => {
                   href="#equipe"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm text-gray-700 font-medium rounded-full hover:bg-white hover:shadow-lg transition-all duration-300 border border-amber-100/50"
                 >
-                  Rencontrer l'équipe
+                  Rencontrer l&apos;équipe
                 </Link>
               </div>
             </div>
@@ -428,7 +428,7 @@ const AboutPage = () => {
                   Notre Vision
                 </span>
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mt-2 mb-6">
-                  Plus qu'une plateforme,
+                  Plus qu&apos;une plateforme,
                   <br />
                   <span className="text-transparent bg-clip-text bg-linear-to-r from-amber-600 to-rose-600">
                     un mouvement
@@ -438,27 +438,27 @@ const AboutPage = () => {
                   <p>
                     <span className="font-semibold text-gray-800">
                       LAB (Libres Authentiques et Belles)
-                    </span>{" "}
-                    est né d'un constat : les femmes camerounaises manquent d'un
+                    </span>{' '}
+                    est né d&apos;un constat : les femmes camerounaises manquent d&apos;un
                     espace dédié où elles peuvent trouver à la fois inspiration,
                     soutien et outils concrets pour leur épanouissement.
                   </p>
                   <p>
                     <span className="font-semibold text-gray-800">
                       Virtuose Pro
-                    </span>{" "}
+                    </span>{' '}
                     est venu compléter cette vision en offrant des services
                     professionnels de haute qualité aux TPE/PME, permettant aux
-                    femmes entrepreneures de se concentrer sur l'essentiel : le
+                    femmes entrepreneures de se concentrer sur l&apos;essentiel : le
                     développement de leur business.
                   </p>
                   <p>
-                    Aujourd'hui,{" "}
+                    Aujourd&apos;hui,{' '}
                     <span className="font-semibold text-gray-800">
-                      BAL & Virtuose Pro
-                    </span>{" "}
+                      BAL &amp; Virtuose Pro
+                    </span>{' '}
                     est un écosystème complet qui accompagne les femmes à chaque
-                    étape de leur parcours, de l'inspiration à la concrétisation
+                    étape de leur parcours, de l&apos;inspiration à la concrétisation
                     de leurs projets.
                   </p>
                 </div>
@@ -581,7 +581,7 @@ const AboutPage = () => {
               >
                 <Quote className="w-8 h-8 text-amber-400 mb-4" />
                 <p className="text-gray-600 leading-relaxed italic mb-4">
-                  "{testimonial.quote}"
+                  &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
                   <div className="w-10 h-10 bg-linear-to-br from-amber-400 to-rose-400 rounded-full flex items-center justify-center text-white font-bold">
@@ -663,7 +663,7 @@ const AboutPage = () => {
                       Impact Social
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Nous contribuons activement à l'autonomisation des femmes
+                      Nous contribuons activement à l&apos;autonomisation des femmes
                       et au développement local.
                     </p>
                   </div>

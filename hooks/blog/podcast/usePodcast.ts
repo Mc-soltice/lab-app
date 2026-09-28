@@ -6,6 +6,8 @@ import { useTags } from "@/hooks/blog/post/useTags";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import type { PodcastReadDto } from "@/types/podcast";
+import { toError } from "@/lib/error-utils";
 
 export interface PodcastFormData {
   title: string;
@@ -34,8 +36,8 @@ export interface PodcastFormErrors {
 
 interface UsePodcastOptions {
   initialData?: Partial<PodcastFormData>;
-  onSuccess?: (podcast: any) => void;
-  onError?: (error: any) => void;
+  onSuccess?: (podcast: PodcastReadDto) => void;
+  onError?: (error: Error) => void;
 }
 
 const initialFormData: PodcastFormData = {
@@ -206,11 +208,19 @@ export function usePodcast(options: UsePodcastOptions = {}) {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Erreur lors de la création du podcast");
+          let errorMessage = "Erreur lors de la création du podcast";
+
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.error || errorMessage;
+          } catch {
+            errorMessage = response.statusText || errorMessage;
+          }
+
+          throw new Error(errorMessage);
         }
 
-        const result = await response.json();
+        const result = (await response.json()) as PodcastReadDto;
 
         toast.success(
           formData.status === "PUBLISHED"
@@ -225,13 +235,15 @@ export function usePodcast(options: UsePodcastOptions = {}) {
         }
 
         resetForm();
-      } catch (error: any) {
-        console.error("Erreur lors de la soumission:", error);
-        toast.error(error.message || "Erreur lors de la création du podcast");
+      } catch (error: unknown) {
+        const normalizedError = toError(
+          error,
+          "Erreur lors de la création du podcast",
+        );
+        console.error("Erreur lors de la soumission:", normalizedError);
+        toast.error(normalizedError.message);
 
-        if (options.onError) {
-          options.onError(error);
-        }
+        options.onError?.(normalizedError);
       } finally {
         setIsSubmitting(false);
       }

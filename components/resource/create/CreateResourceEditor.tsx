@@ -11,6 +11,7 @@ import { useBook } from "@/hooks/blog/book/useBook";
 import { useImageUpload } from "@/hooks/blog/useImageUpload";
 import { usePodcast } from "@/hooks/blog/podcast/usePodcast";
 import { usePost } from "@/hooks/blog/post/usePost";
+import type { PodcastFormData } from "@/hooks/blog/podcast/usePodcast";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -20,6 +21,41 @@ export type CreateResourceType = "podcast" | "post" | "book";
 interface CreateResourceEditorProps {
   type: CreateResourceType;
 }
+
+interface ResourceEditorFormData {
+  title: string;
+  description: string;
+  content: string;
+  excerpt: string;
+  synopsis: string;
+  audioUrl: string;
+  mediaType: PodcastFormData["mediaType"];
+  duration: number;
+  transcript: string;
+  coverImage: string;
+  fileUrl: string;
+  price: number | null;
+  categoryId: string;
+  emissionId: string;
+  tagIds: string[];
+}
+
+type ResourceFieldUpdate =
+  | { field: "title"; value: string }
+  | { field: "description"; value: string }
+  | { field: "content"; value: string }
+  | { field: "excerpt"; value: string }
+  | { field: "synopsis"; value: string }
+  | { field: "audioUrl"; value: string }
+  | { field: "mediaType"; value: PodcastFormData["mediaType"] }
+  | { field: "duration"; value: number }
+  | { field: "transcript"; value: string }
+  | { field: "coverImage"; value: string }
+  | { field: "fileUrl"; value: string }
+  | { field: "price"; value: number | null }
+  | { field: "categoryId"; value: string }
+  | { field: "emissionId"; value: string }
+  | { field: "tagIds"; value: string[] };
 
 const resourceCopy: Record<
   CreateResourceType,
@@ -86,13 +122,49 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
     error: uploadError,
   } = useImageUpload();
 
-  const active: any = type === "podcast" ? podcast : type === "post" ? post : book;
-  const formData: any = active.formData;
-  const categories: any = active.categories;
-  const emissions: any = active.emissions;
-  const tags: any = active.tags;
-  const errors: Record<string, string> = active.errors || {};
-  const isSubmitting = active.isSubmitting;
+  const formData: ResourceEditorFormData = {
+    title: type === "podcast" ? podcast.formData.title : type === "post" ? post.formData.title : book.formData.title,
+    description: type === "podcast" ? podcast.formData.description : "",
+    content: type === "post" ? post.formData.content : "",
+    excerpt: type === "post" ? post.formData.excerpt : "",
+    synopsis: type === "book" ? book.formData.synopsis || "" : "",
+    audioUrl: type === "podcast" ? podcast.formData.audioUrl : "",
+    mediaType: podcast.formData.mediaType,
+    duration: type === "podcast" ? podcast.formData.duration : 0,
+    transcript: type === "podcast" ? podcast.formData.transcript : "",
+    coverImage:
+      type === "podcast"
+        ? podcast.formData.coverImage
+        : type === "post"
+          ? post.formData.cover_image
+          : book.formData.cover_image || "",
+    fileUrl: type === "book" ? book.formData.file_url || "" : "",
+    price: type === "book" ? book.formData.price ?? null : null,
+    categoryId:
+      type === "podcast"
+        ? podcast.formData.categoryId
+        : type === "post"
+          ? post.formData.category_id
+          : book.formData.category_id || "",
+    emissionId: type === "podcast" ? podcast.formData.emissionId : "",
+    tagIds:
+      type === "podcast"
+        ? podcast.formData.tagIds
+        : type === "post"
+          ? post.formData.tag_ids
+          : book.formData.tag_ids,
+  };
+  const categories = podcast.categories;
+  const emissions = podcast.emissions;
+  const tags = podcast.tags;
+  const errors =
+    type === "podcast" ? podcast.errors : type === "post" ? post.errors : book.errors;
+  const isSubmitting =
+    type === "podcast"
+      ? podcast.isSubmitting
+      : type === "post"
+        ? post.isSubmitting
+        : book.isSubmitting;
   const isBusy =
     isCreatingTag ||
     isCreatingCategory ||
@@ -108,8 +180,50 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
     return () => window.removeEventListener("resize", updateMobile);
   }, []);
 
-  const updateField = (field: string, value: unknown) => {
-    active.updateField(field as never, value as never);
+  const updateField = ({ field, value }: ResourceFieldUpdate) => {
+    switch (field) {
+      case "title":
+        if (type === "podcast") podcast.updateField(field, value);
+        else if (type === "post") post.updateField(field, value);
+        else book.updateField(field, value);
+        break;
+      case "categoryId":
+        if (type === "podcast") podcast.updateField(field, value);
+        else if (type === "post") post.updateField("category_id", value);
+        else book.updateField("category_id", value || null);
+        break;
+      case "tagIds":
+        if (type === "podcast") podcast.updateField(field, value);
+        else if (type === "post") post.updateField("tag_ids", value);
+        else book.updateField("tag_ids", value);
+        break;
+      case "coverImage":
+        if (type === "podcast") podcast.updateField(field, value);
+        else if (type === "post") post.updateField("cover_image", value);
+        else book.updateField("cover_image", value);
+        break;
+      case "description":
+      case "audioUrl":
+      case "mediaType":
+      case "duration":
+      case "transcript":
+      case "emissionId":
+        if (type !== "podcast") throw new Error(`Champ invalide pour ${type}: ${field}`);
+        podcast.updateField(field, value);
+        break;
+      case "content":
+      case "excerpt":
+        if (type !== "post") throw new Error(`Champ invalide pour ${type}: ${field}`);
+        post.updateField(field, value);
+        break;
+      case "synopsis":
+      case "fileUrl":
+      case "price":
+        if (type !== "book") throw new Error(`Champ invalide pour ${type}: ${field}`);
+        if (field === "fileUrl") book.updateField("file_url", value);
+        else book.updateField(field, value);
+        break;
+    }
   };
 
   const handleTagAdd = async (name: string) => {
@@ -118,8 +232,7 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
     try {
       const tag = await tags.createAndSelectTag(name.trim());
       if (tag) {
-        const ids = type === "podcast" ? formData.tagIds : formData.tag_ids || [];
-        updateField(type === "podcast" ? "tagIds" : "tag_ids", [...ids, tag.id]);
+        updateField({ field: "tagIds", value: [...formData.tagIds, tag.id] });
         toast.success(`Tag "${name}" ajouté`);
       }
     } finally {
@@ -130,11 +243,8 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
   const handleTagRemove = (name: string) => {
     const tag = tags.getTagByName(name);
     if (!tag) return;
-    const field = type === "podcast" ? "tagIds" : "tag_ids";
-    const ids = (type === "podcast" ? formData.tagIds : formData.tag_ids || []).filter(
-      (id: string) => id !== tag.id,
-    );
-    updateField(field, ids);
+    const ids = formData.tagIds.filter((id) => id !== tag.id);
+    updateField({ field: "tagIds", value: ids });
   };
 
   const handleCategoryAdd = async (name: string) => {
@@ -143,23 +253,21 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
     try {
       const category = await categories.createAndSelectCategory(name.trim());
       if (category)
-        updateField(type === "podcast" ? "categoryId" : "category_id", category.id);
+        updateField({ field: "categoryId", value: category.id });
     } finally {
       setIsCreatingCategory(false);
     }
   };
 
-  const categoryField = type === "podcast" ? "categoryId" : "category_id";
-  const selectedCategoryId = formData[categoryField] || "";
+  const selectedCategoryId = formData.categoryId;
   const selectedCategoryName = selectedCategoryId
     ? categories.getCategoryName(selectedCategoryId)
     : "";
 
   const handleCategoryRemove = () =>
-    updateField(categoryField, type === "podcast" ? "" : null);
+    updateField({ field: "categoryId", value: "" });
 
-  const emissionField = type === "podcast" ? "emissionId" : "emission_id";
-  const selectedEmissionId = type === "podcast" ? formData.emissionId || "" : "";
+  const selectedEmissionId = formData.emissionId;
   const selectedEmissionName = selectedEmissionId
     ? emissions.getEmissionName(selectedEmissionId)
     : "";
@@ -170,7 +278,7 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
     try {
       const emission = await emissions.createAndSelectEmission(name.trim());
       if (emission) {
-        updateField("emissionId", emission.id);
+        updateField({ field: "emissionId", value: emission.id });
         toast.success(`Émission "${name}" ajoutée`);
       }
     } finally {
@@ -178,18 +286,17 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
     }
   };
 
-  const handleEmissionRemove = () => updateField("emissionId", "");
+  const handleEmissionRemove = () =>
+    updateField({ field: "emissionId", value: "" });
 
   const handleImageUpload = async (file: File) => {
     const imageUrl = await uploadImage(
       file,
       type === "book" ? "books/covers" : undefined,
     );
-    if (imageUrl)
-      updateField(type === "podcast" ? "coverImage" : "cover_image", imageUrl);
+    if (imageUrl) updateField({ field: "coverImage", value: imageUrl });
   };
 
-  const coverField = type === "podcast" ? "coverImage" : "cover_image";
   const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -200,7 +307,7 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
     setIsUploadingPdf(true);
     try {
       const url = await uploadFile(file, "books/files", "raw");
-      if (url) updateField("file_url", url);
+      if (url) updateField({ field: "fileUrl", value: url });
     } finally {
       setIsUploadingPdf(false);
       event.target.value = "";
@@ -219,7 +326,7 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
       {
         key: "cover",
         label: "Image de couverture",
-        done: Boolean(formData[coverField]),
+        done: Boolean(formData.coverImage),
       },
       {
         key: "category",
@@ -230,7 +337,7 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
         key: "tags",
         label: "Tag(s) sélectionnés",
         done:
-          (type === "podcast" ? formData.tagIds : formData.tag_ids || []).length > 0,
+          formData.tagIds.length > 0,
       },
     ];
     if (type === "podcast") {
@@ -272,24 +379,27 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
         label: "Synopsis rédigé",
         done: Boolean(formData.synopsis?.trim()),
       },
-      { key: "file", label: "PDF ajouté", done: Boolean(formData.file_url) },
+      { key: "file", label: "PDF ajouté", done: Boolean(formData.fileUrl) },
       ...common.slice(1),
     ];
-  }, [coverField, formData, selectedCategoryId, type]);
+  }, [formData, selectedCategoryId, type]);
 
   const completedCount = checklistItems.filter((item) => item.done).length;
-  const tagsField = type === "podcast" ? "tagIds" : "tag_ids";
-  const selectedTagIds = formData[tagsField] || [];
-  const tagNames = tags.tagNames.filter((name: string) =>
-    selectedTagIds.some((id: string) => tags.getTagByName(name)?.id === id),
+  const tagNames = tags.tagNames.filter((name) =>
+    formData.tagIds.some((id) => tags.getTagByName(name)?.id === id),
   );
   const published =
-    type === "post" ? formData.published : formData.status === "PUBLISHED";
-  const setPublished = (value: boolean) =>
-    updateField(
-      type === "post" ? "published" : "status",
-      type === "post" ? value : value ? "PUBLISHED" : "DRAFT",
-    );
+    type === "post"
+      ? post.formData.published
+      : type === "podcast"
+        ? podcast.formData.status === "PUBLISHED"
+        : book.formData.status === "PUBLISHED";
+  const setPublished = (value: boolean) => {
+    const status = value ? "PUBLISHED" : "DRAFT";
+    if (type === "post") post.updateField("published", value);
+    else if (type === "podcast") podcast.updateField("status", status);
+    else book.updateField("status", status);
+  };
 
   return (
     <ProtectedRoute
@@ -315,7 +425,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
           }
           summaryItems={[
             { label: "Catégorie", value: selectedCategoryName || "Aucune" },
-            { label: "Émission", value: selectedEmissionName || "Aucune" },
+            ...(type === "podcast"
+              ? [{ label: "Émission", value: selectedEmissionName || "Aucune" }]
+              : []),
             { label: "Tags", value: tagNames.join(", ") || "Aucun" },
             { label: "Statut", value: published ? "Publié" : "Brouillon" },
             ...(type === "podcast"
@@ -353,7 +465,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
             <input
               type="text"
               value={formData.title}
-              onChange={(event) => updateField("title", event.target.value)}
+              onChange={(event) =>
+                updateField({ field: "title", value: event.target.value })
+              }
               required
               placeholder={`Titre ${type === "podcast" ? "du podcast" : type === "post" ? "de l'article" : "du livre"}...`}
               className="w-full rounded-xl px-4 py-4 text-2xl sm:text-3xl font-light outline-none"
@@ -372,7 +486,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
               <FieldSection label="Description" focused={isDescriptionFocused}>
                 <textarea
                   value={formData.description}
-                  onChange={(event) => updateField("description", event.target.value)}
+                  onChange={(event) =>
+                    updateField({ field: "description", value: event.target.value })
+                  }
                   required
                   rows={6}
                   placeholder="Décrivez votre podcast..."
@@ -391,7 +507,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
               <FieldSection label="Contenu">
                 <textarea
                   value={formData.content}
-                  onChange={(event) => updateField("content", event.target.value)}
+                  onChange={(event) =>
+                    updateField({ field: "content", value: event.target.value })
+                  }
                   required
                   rows={14}
                   placeholder="Commencez à écrire..."
@@ -403,7 +521,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
                 />
                 <textarea
                   value={formData.excerpt || ""}
-                  onChange={(event) => updateField("excerpt", event.target.value)}
+                  onChange={(event) =>
+                    updateField({ field: "excerpt", value: event.target.value })
+                  }
                   rows={2}
                   placeholder="Un résumé captivant..."
                   className="w-full border-t px-4 py-3 text-sm resize-none outline-none"
@@ -420,7 +540,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
               <FieldSection label="Synopsis">
                 <textarea
                   value={formData.synopsis || ""}
-                  onChange={(event) => updateField("synopsis", event.target.value)}
+                  onChange={(event) =>
+                    updateField({ field: "synopsis", value: event.target.value })
+                  }
                   rows={6}
                   placeholder="Résumé du livre..."
                   className="w-full px-4 py-4 text-sm resize-none outline-none"
@@ -438,7 +560,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
                   audio_url={formData.audioUrl}
                   media_type={formData.mediaType}
                   onAudioChange={podcast.updateAudio}
-                  onAudioRemove={() => updateField("audioUrl", "")}
+                  onAudioRemove={() =>
+                    updateField({ field: "audioUrl", value: "" })
+                  }
                 />
                 <FieldSection label="Durée (secondes)">
                   <input
@@ -446,7 +570,10 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
                     min={30}
                     value={formData.duration || ""}
                     onChange={(event) =>
-                      updateField("duration", Number(event.target.value) || 0)
+                      updateField({
+                        field: "duration",
+                        value: Number(event.target.value) || 0,
+                      })
                     }
                     className="w-full px-3 py-2 text-sm outline-none"
                     style={{
@@ -458,7 +585,9 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
                 <FieldSection label="Transcription (optionnelle)">
                   <textarea
                     value={formData.transcript || ""}
-                    onChange={(event) => updateField("transcript", event.target.value)}
+                    onChange={(event) =>
+                      updateField({ field: "transcript", value: event.target.value })
+                    }
                     rows={4}
                     className="w-full px-3 py-2 text-sm resize-none outline-none"
                     style={{
@@ -479,10 +608,12 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
                     step="0.01"
                     value={formData.price || ""}
                     onChange={(event) =>
-                      updateField(
-                        "price",
-                        event.target.value ? Number(event.target.value) : null,
-                      )
+                      updateField({
+                        field: "price",
+                        value: event.target.value
+                          ? Number(event.target.value)
+                          : null,
+                      })
                     }
                     className="w-full px-3 py-2 text-sm outline-none"
                     style={{
@@ -501,7 +632,7 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
                   {isUploadingPdf && (
                     <p className="mt-2 text-xs">Upload du PDF en cours...</p>
                   )}
-                  {formData.file_url && (
+                  {formData.fileUrl && (
                     <p className="mt-2 text-xs text-green-600">
                       PDF prêt pour le téléchargement
                     </p>
@@ -512,13 +643,17 @@ export default function CreateResourceEditor({ type }: CreateResourceEditorProps
 
             <FieldSection label="Image de couverture">
               <CoverImageUpload
-                cover_image={formData[coverField] || ""}
+                cover_image={formData.coverImage}
                 isUploading={isUploading}
                 uploadProgress={progress}
                 uploadError={uploadError}
                 onImageUpload={handleImageUpload}
-                onImageRemove={() => updateField(coverField, "")}
-                onUrlChange={(url) => updateField(coverField, url)}
+                onImageRemove={() =>
+                  updateField({ field: "coverImage", value: "" })
+                }
+                onUrlChange={(url) =>
+                  updateField({ field: "coverImage", value: url })
+                }
                 onDeleteImage={deleteImage}
                 maxSize={5}
               />

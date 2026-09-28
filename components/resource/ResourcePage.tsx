@@ -12,7 +12,7 @@ import { useState } from "react";
 
 export default function ResourcePage({ resource }: { resource: string }) {
   const config = resourceRegistry[resource] as ResourceDefinition | undefined;
-  if (!config) return <div className="p-6">Ressource introuvable.</div>;
+  if (!config) return <div className="lg:p-6">Ressource introuvable.</div>;
   return <ResourceContent config={config} />;
 }
 
@@ -37,7 +37,7 @@ function ResourceContent({ config }: { config: ResourceDefinition }) {
   }));
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-2 space-y-2 lg:p-6 lg:space-y-6">
       <FilterHeader
         title={config.title}
         description={`${state.totalItems} ${config.singular}${state.totalItems > 1 ? "s" : ""} au total`}

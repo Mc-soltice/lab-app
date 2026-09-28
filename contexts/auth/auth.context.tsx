@@ -1,5 +1,6 @@
 "use client";
 
+import type { CreateUserDto } from "@/types/user";
 import { getSession, signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, {
@@ -10,10 +11,8 @@ import React, {
   useState,
 } from "react";
 import { toast } from "react-hot-toast";
-import { z } from "zod";
-import { RegisterSchema } from "../../lib/validation/schemas";
 
-type CreateUserPayload = z.infer<typeof RegisterSchema>;
+type CreateUserPayload = CreateUserDto;
 
 type AuthContextValue = {
   register: (data: CreateUserPayload) => Promise<void>;
@@ -92,9 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await login(data.email, data.password);
       } catch (error) {
         toast.error(
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de l'inscription",
+          error instanceof Error ? error.message : "Erreur lors de l'inscription",
         );
         throw error;
       } finally {

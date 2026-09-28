@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
               Tableau de bord
             </p>
             <h1 className="mt-2 text-3xl font-semibold text-(--text-primary) sm:text-4xl">
-              Vue d'ensemble de l'administration
+              Vue d&apos;ensemble de l&apos;administration
             </h1>
             <p className="mt-3 text-sm leading-6 text-(--text-secondary)">
               Suivez les indicateurs clés, les publications récentes et les

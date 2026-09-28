@@ -1,7 +1,8 @@
 // components/blog/create/AudioUpload.tsx
 "use client";
 
-import { Film, Loader2, Music, X } from "lucide-react";
+import { Film, Music, X } from "lucide-react";
+import { CircularProgress } from "@/components/ui/AdvancedLoadingComponent";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -92,7 +93,34 @@ export default function AudioUpload({
 }: AudioUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
+
+  const uploadMedia = (formData: FormData): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          setUploadProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      });
+      xhr.addEventListener("load", () => {
+        try {
+          const result = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300 && result.data?.secure_url) {
+            resolve(result.data.secure_url);
+          } else {
+            reject(new Error(result.error || "Impossible d'uploader le média"));
+          }
+        } catch {
+          reject(new Error("Réponse invalide du serveur d'upload"));
+        }
+      });
+      xhr.addEventListener("error", () => reject(new Error("Erreur réseau")));
+      xhr.open("POST", "/api/upload");
+      xhr.send(formData);
+    });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,6 +136,7 @@ export default function AudioUpload({
     }
 
     setIsLoading(true);
+    setUploadProgress(0);
     const optimizedFile = file.type.startsWith("video/")
       ? await optimizeVideoForUpload(file)
       : file;
@@ -134,19 +163,10 @@ export default function AudioUpload({
       formData.append("folder", "blog/podcasts");
       formData.append("resourceType", detectedMediaType === "VIDEO" ? "video" : "auto");
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.data?.secure_url) {
-        throw new Error(result.error || "Impossible d'uploader le média");
-      }
+      const uploadedUrl = await uploadMedia(formData);
 
       setAudioDuration(duration ?? null);
-      onAudioChange(result.data.secure_url, duration ?? undefined, detectedMediaType);
+      onAudioChange(uploadedUrl, duration ?? undefined, detectedMediaType);
       toast.success(
         `${detectedMediaType === "VIDEO" ? "Vidéo" : "Audio"} uploadé avec succès`,
       );
@@ -158,6 +178,7 @@ export default function AudioUpload({
     } finally {
       URL.revokeObjectURL(objectUrl);
       setIsLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -196,7 +217,7 @@ export default function AudioUpload({
         className="block text-sm font-medium mb-3"
         style={{ color: "var(--text-primary)" }}
       >
-        Fichier audio
+        Fichier audio ou vidéo
       </label>
 
       {audio_url ? (
@@ -263,12 +284,14 @@ export default function AudioUpload({
         >
           {isLoading ? (
             <>
-              <div
-                className="animate-spin rounded-full h-8 w-8 border-2"
-                style={{ borderColor: "var(--accent)" }}
+              <CircularProgress
+                percentage={uploadProgress}
+                size="sm"
+                color="orange"
+                label="Upload en cours"
               />
               <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                Analyse du fichier audio...
+                Envoi du média... {uploadProgress}%
               </span>
             </>
           ) : (

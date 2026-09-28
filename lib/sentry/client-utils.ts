@@ -6,6 +6,10 @@
 import * as Sentry from "@sentry/nextjs";
 import { SENTRY_CLIENT_CONFIG } from "./config";
 
+function isContext(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 /**
  * Initialise Sentry côté client
  * À appeler depuis le layout racine
@@ -24,11 +28,15 @@ export function initializeSentryClient() {
 /**
  * Capture une exception manuellement
  */
-export function captureException(error: Error, context?: Record<string, any>) {
+export function captureException(
+  error: Error,
+  context?: Record<string, unknown>,
+) {
   Sentry.withScope((scope) => {
     if (context) {
       Object.entries(context).forEach(([key, value]) => {
-        scope.setContext(key, value);
+        if (isContext(value)) scope.setContext(key, value);
+        else scope.setExtra(key, value);
       });
     }
     Sentry.captureException(error);
@@ -48,7 +56,10 @@ export function captureMessage(
 /**
  * Ajoute une breadcrumb (piste de navigation)
  */
-export function addBreadcrumb(message: string, data?: Record<string, any>) {
+export function addBreadcrumb(
+  message: string,
+  data?: Record<string, unknown>,
+) {
   Sentry.addBreadcrumb({
     message,
     data,

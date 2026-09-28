@@ -6,6 +6,12 @@ import { MessageCircle, Send } from "lucide-react";
 import React from "react";
 import { UIComment } from "./ArticleView";
 
+interface ProfileSummary {
+  name: string;
+  avatar?: string;
+  roleLabel?: string;
+}
+
 interface CommentsSectionProps {
   comments: UIComment[];
   postId: string;
@@ -14,7 +20,7 @@ interface CommentsSectionProps {
   commentText: string;
   setCommentText: (t: string) => void;
   isSubmittingComment: boolean;
-  activeProfile?: any;
+  activeProfile?: ProfileSummary;
   handleCommentFormSubmit: (e: React.FormEvent) => void;
 }
 
@@ -140,7 +146,7 @@ export default function CommentsSection({
           className="text-[10px] font-mono font-bold uppercase tracking-widest"
           style={{ color: "var(--ra-amber)" }}
         >
-          Fiche d'inscription — nouvelle entrée
+          Fiche d&apos;inscription — nouvelle entrée
         </h4>
 
         {activeProfile ? (
@@ -175,7 +181,7 @@ export default function CommentsSection({
                   className="text-[9px] font-mono uppercase"
                   style={{ color: "var(--ra-ink-soft)" }}
                 >
-                  Session active • {activeProfile.roleLabel}
+                  Session active • {activeProfile.roleLabel || "Profil"}
                 </span>
               </div>
             </div>
@@ -299,7 +305,7 @@ export default function CommentsSection({
             ) : (
               <Send className="w-3.5 h-3.5" />
             )}
-            Enregistrer l'entrée
+            Enregistrer l&apos;entrée
           </button>
         </div>
       </form>

@@ -200,7 +200,7 @@ export default function LoginContent() {
           </motion.h3>
 
           {/* CONTENEUR AVEC HAUTEUR MINIMUM FIXE */}
-          <div className="flex flex-col gap-3 min-h-[300px]">
+          <div className="flex flex-col gap-3 min-h-75">
             {/* Boutons sociaux - uniquement en login */}
             <AnimatePresence mode="wait">
               {isLogin && (
@@ -258,12 +258,7 @@ export default function LoginContent() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Image
-                      src={facebook}
-                      alt="Facebook"
-                      width={24}
-                      height={24}
-                    />
+                    <Image src={facebook} alt="Facebook" width={24} height={24} />
                     <p className="text-[#5c5c5c]">
                       <span className="hidden md:inline">Login with </span>
                       Facebook
@@ -305,9 +300,7 @@ export default function LoginContent() {
                       <div className="w-full border-t border-black/20"></div>
                     </div>
                     <div className="relative flex justify-center">
-                      <span className="bg-white px-3 text-xs text-gray-500">
-                        Or
-                      </span>
+                      <span className="bg-white px-3 text-xs text-gray-500">Or</span>
                     </div>
                   </div>
                 </motion.div>
@@ -473,9 +466,7 @@ export default function LoginContent() {
             className="text-center text-sm mt-2"
           >
             <span className="text-gray-500">
-              {isLogin
-                ? "Don't have an account? "
-                : "Already have an account? "}
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
             </span>
             <motion.button
               type="button"

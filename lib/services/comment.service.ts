@@ -1,6 +1,6 @@
 // lib/services/comment.service.ts
 import { Comment } from "@/prisma/generated/client";
-import { z } from "zod";
+import type { CreateCommentDto } from "@/types/comment";
 import { ForbiddenException, NotFoundException } from "../exceptions";
 import { BookRepository } from "../repositories/book.repository";
 import { CommentRepository } from "../repositories/comment.repository";
@@ -8,7 +8,6 @@ import { PodcastRepository } from "../repositories/podcast.repository";
 import { PostRepository } from "../repositories/post.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { CommentTargetRef } from "../types/target";
-import { CreateCommentSchema } from "../validation/schemas";
 import { NotificationService } from "./notification.service";
 
 export class CommentService {
@@ -22,7 +21,7 @@ export class CommentService {
   async createComment(
     target: CommentTargetRef,
     userId: string,
-    data: z.infer<typeof CreateCommentSchema>,
+    data: CreateCommentDto,
   ): Promise<Comment> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException("Utilisateur non trouvé");
@@ -47,7 +46,7 @@ export class CommentService {
   async createReply(
     commentId: string,
     userId: string,
-    data: z.infer<typeof CreateCommentSchema>,
+    data: CreateCommentDto,
   ): Promise<Comment> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException("Utilisateur non trouvé");
@@ -158,9 +157,7 @@ export class CommentService {
     }
   }
 
-  private async incrementCommentsCount(
-    target: CommentTargetRef,
-  ): Promise<void> {
+  private async incrementCommentsCount(target: CommentTargetRef): Promise<void> {
     switch (target.type) {
       case "post":
         return this.postRepository.incrementComments(target.id);
@@ -171,9 +168,7 @@ export class CommentService {
     }
   }
 
-  private async decrementCommentsCount(
-    target: CommentTargetRef,
-  ): Promise<void> {
+  private async decrementCommentsCount(target: CommentTargetRef): Promise<void> {
     switch (target.type) {
       case "post":
         return this.postRepository.decrementComments(target.id);

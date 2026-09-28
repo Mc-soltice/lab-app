@@ -1,13 +1,13 @@
 "use client";
 
-import ArticleCard from "@/components/ui/ArticleCard";
 import FilterHeader, { FilterToggleGroup } from "@/components/ui/FilterHeader";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import Pagination from "@/components/ui/Pagination";
 import type { FeedItem } from "@/lib/services/feed.service";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import OptimizedImage from "./OptimizedImage";
+import ArticleCard from "./ArticleCard";
 
 interface PostFeedClientProps {
   initialFeed: FeedItem[];
@@ -304,7 +304,7 @@ export default function PostFeedClient({
         ) : (
           <>
             {/* Grille des posts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 w-full">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-4 w-full">
               {filteredFeed.map((feedItem) => (
                 <ArticleCard
                   key={feedItem.post.id}

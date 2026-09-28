@@ -4,10 +4,12 @@
 import { useCategories } from "@/hooks/blog/post/useCategories";
 import { useTags } from "@/hooks/blog/post/useTags";
 import { CreateBookSchema } from "@/lib/validation/schemas";
+import { toError } from "@/lib/error-utils";
+import type { BookServiceReadDto } from "@/types/book";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 
-interface BookFormData {
+export interface BookFormData {
   title: string;
   synopsis?: string;
   cover_image?: string;
@@ -19,7 +21,7 @@ interface BookFormData {
 }
 
 interface UseBookOptions {
-  onSuccess?: (book: any) => void;
+  onSuccess?: (book: BookServiceReadDto) => void;
   onError?: (error: Error) => void;
 }
 
@@ -43,7 +45,7 @@ export function useBook(options: UseBookOptions = {}) {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   const updateField = useCallback(
-    (field: keyof BookFormData, value: any) => {
+    <K extends keyof BookFormData>(field: K, value: BookFormData[K]) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
       if (hasAttemptedSubmit) {
         setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -109,12 +111,14 @@ export function useBook(options: UseBookOptions = {}) {
           }),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.error || "Erreur lors de la création du livre");
+          const errorData = (await response.json()) as { error?: string };
+          throw new Error(
+            errorData.error || "Erreur lors de la création du livre",
+          );
         }
 
+        const data = (await response.json()) as BookServiceReadDto;
         toast.success(
           formData.status === "PUBLISHED"
             ? "Livre publié avec succès !"
@@ -123,11 +127,10 @@ export function useBook(options: UseBookOptions = {}) {
 
         options.onSuccess?.(data);
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Erreur inconnue";
-        setErrors((prev) => ({ ...prev, submit: message }));
-        options.onError?.(error as Error);
-        toast.error(message);
+        const normalizedError = toError(error, "Erreur inconnue");
+        setErrors((prev) => ({ ...prev, submit: normalizedError.message }));
+        options.onError?.(normalizedError);
+        toast.error(normalizedError.message);
       } finally {
         setIsSubmitting(false);
       }

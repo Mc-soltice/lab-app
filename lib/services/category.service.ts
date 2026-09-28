@@ -1,14 +1,10 @@
 // lib/services/category.service.ts
 import { Category } from "@/prisma/generated/client";
+import type { CreateCategoryDto, UpdateCategoryDto } from "@/types/category";
 import slugify from "slugify";
-import { z } from "zod";
 import { ConflictException, NotFoundException } from "../exceptions";
 import { CategoryRepository } from "../repositories/category.repository";
 import { PostRepository } from "../repositories/post.repository";
-import {
-  CreateCategorySchema,
-  UpdateCategorySchema,
-} from "../validation/schemas";
 
 export class CategoryService {
   private categoryRepository = new CategoryRepository();
@@ -18,9 +14,7 @@ export class CategoryService {
     return this.categoryRepository.findAll();
   }
 
-  async createCategory(
-    data: z.infer<typeof CreateCategorySchema>,
-  ): Promise<Category> {
+  async createCategory(data: CreateCategoryDto): Promise<Category> {
     const slug = slugify(data.name, { lower: true, strict: true });
     const existing = await this.categoryRepository.findBySlug(slug);
     if (existing) throw new ConflictException("Cette catégorie existe déjà");
@@ -34,10 +28,7 @@ export class CategoryService {
     return category;
   }
 
-  async updateCategory(
-    id: string,
-    data: z.infer<typeof UpdateCategorySchema>,
-  ): Promise<Category> {
+  async updateCategory(id: string, data: UpdateCategoryDto): Promise<Category> {
     const category = await this.categoryRepository.findById(id);
     if (!category) throw new NotFoundException("Catégorie non trouvée");
     return this.categoryRepository.update(id, data);

@@ -290,7 +290,7 @@ const CommunitySection = () => {
                             href={event.href}
                             className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors"
                           >
-                            S'inscrire maintenant
+                            S&apos;inscrire maintenant
                             <ArrowRight className="w-4 h-4" />
                           </Link>
                         </div>
@@ -366,7 +366,7 @@ const CommunitySection = () => {
                       {renderStars(testimonial.rating)}
                     </div>
                     <p className="text-sm text-gray-600 italic">
-                      "{testimonial.content}"
+                      &ldquo;{testimonial.content}&rdquo;
                     </p>
                     <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
                       <div className="w-10 h-10 bg-linear-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">
@@ -399,7 +399,7 @@ const CommunitySection = () => {
                   <Sparkles className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">
-                  Prête à rejoindre l'aventure ?
+                  Prête à rejoindre l&apos;aventure ?
                 </h3>
                 <p className="text-sm text-white/90 mb-4">
                   Inscrivez-vous à notre newsletter et recevez des contenus
@@ -415,7 +415,7 @@ const CommunitySection = () => {
                     type="submit"
                     className="w-full px-4 py-3 bg-white text-purple-700 font-medium rounded-xl hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
-                    Je m'inscris
+                    Je m&apos;inscris
                   </button>
                 </form>
                 <p className="text-xs text-white/70 mt-2 flex items-center justify-center gap-1">

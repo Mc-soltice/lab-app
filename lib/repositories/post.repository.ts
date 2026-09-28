@@ -10,6 +10,25 @@ const AUTHOR_SELECT = {
   avatar: true,
 } satisfies Prisma.UserSelect;
 
+export const FEED_POST_INCLUDE = {
+  author: {
+    select: {
+      ...AUTHOR_SELECT,
+      bio: true,
+    },
+  },
+  category: { select: { id: true, name: true, slug: true } },
+  tags: {
+    include: {
+      tag: { select: { id: true, name: true, slug: true } },
+    },
+  },
+} satisfies Prisma.PostInclude;
+
+export type FeedPostRecord = Prisma.PostGetPayload<{
+  include: typeof FEED_POST_INCLUDE;
+}>;
+
 export class PostRepository {
   private db: PrismaClient;
 
@@ -51,7 +70,7 @@ export class PostRepository {
     authorId: string,
     page = 1,
     limit = 10,
-  ): Promise<{ data: Post[]; total: number }> {
+  ): Promise<{ data: FeedPostRecord[]; total: number }> {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       this.db.post.findMany({
@@ -59,10 +78,7 @@ export class PostRepository {
         skip,
         take: limit,
         orderBy: { publishedAt: "desc" },
-        include: {
-          author: { select: AUTHOR_SELECT },
-          category: { select: { id: true, name: true, slug: true } },
-        },
+        include: FEED_POST_INCLUDE,
       }),
       this.db.post.count({ where: { authorId, status: "PUBLISHED" } }),
     ]);
@@ -140,7 +156,7 @@ export class PostRepository {
     userId?: string,
     page = 1,
     limit = 10,
-  ): Promise<{ data: Post[]; total: number }> {
+  ): Promise<{ data: FeedPostRecord[]; total: number }> {
     const skip = (page - 1) * limit;
     const where: Prisma.PostWhereInput = { status: "PUBLISHED" };
 
@@ -150,13 +166,7 @@ export class PostRepository {
         skip,
         take: limit,
         orderBy: { publishedAt: "desc" },
-        include: {
-          author: { select: AUTHOR_SELECT },
-          category: { select: { id: true, name: true, slug: true } },
-          tags: {
-            include: { tag: { select: { id: true, name: true, slug: true } } },
-          },
-        },
+        include: FEED_POST_INCLUDE,
       }),
       this.db.post.count({ where }),
     ]);

@@ -34,6 +34,8 @@ export default function EcommerceSection({
   ctaLabel = "Voir tous les produits",
   ctaHref = "/boutique",
 }: EcommerceSectionProps) {
+  const [animatingProduct, setAnimatingProduct] = useState<string | null>(null);
+
   // Vérification que products existe et est un tableau
   if (!products || !Array.isArray(products) || products.length === 0) {
     return null;
@@ -41,9 +43,6 @@ export default function EcommerceSection({
 
   // Limiter à 8 produits (2 lignes de 4)
   const displayProducts = products.slice(0, 8);
-
-  // État pour suivre quel produit est en cours d'animation
-  const [animatingProduct, setAnimatingProduct] = useState<string | null>(null);
 
   const handleAddToCart = (e: React.MouseEvent, productId: string) => {
     e.preventDefault();

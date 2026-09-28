@@ -1,16 +1,18 @@
-import LayoutShell from "@/components/Shell/LayoutShell";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import { getSession } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 
-export default function PublicLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function UserLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+  if (!session?.user?.id) {
+    // Redirection côté serveur vers la page de connexion
+    redirect("/login");
+  }
+
   return (
-    <ProtectedRoute fallback={<div className="min-h-screen" />}>
-      <LayoutShell showHeader={true} showSidebar={true}>
-        {children}
-      </LayoutShell>
-    </ProtectedRoute>
+    <div className="min-h-screen flex">
+      <Sidebar />
+      <div className="flex-1">{children}</div>
+    </div>
   );
 }

@@ -340,7 +340,7 @@ export default function TagInput({
                   {isCreate ? (
                     <>
                       <Plus className="w-4 h-4 shrink-0" />
-                      <span>Créer "{option.value}"</span>
+                      <span>Créer &quot;{option.value}&quot;</span>
                     </>
                   ) : (
                     <span>{option.value}</span>

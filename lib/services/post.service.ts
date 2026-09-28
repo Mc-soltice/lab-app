@@ -1,7 +1,7 @@
 // lib/services/post.service.ts
 import { Post, Prisma } from "@/prisma/generated/client";
+import type { CreatePostDto, UpdatePostDto } from "@/types/post";
 import slugify from "slugify";
-import { z } from "zod";
 import {
   ConflictException,
   ForbiddenException,
@@ -10,17 +10,13 @@ import {
 import { CategoryRepository } from "../repositories/category.repository";
 import { PostRepository } from "../repositories/post.repository";
 import { UserRepository } from "../repositories/user.repository";
-import { CreatePostSchema, UpdatePostSchema } from "../validation/schemas";
 
 export class PostService {
   private postRepository = new PostRepository();
   private userRepository = new UserRepository();
   private categoryRepository = new CategoryRepository();
 
-  async createPost(
-    authorId: string,
-    data: z.infer<typeof CreatePostSchema>,
-  ): Promise<Post> {
+  async createPost(authorId: string, data: CreatePostDto): Promise<Post> {
     const user = await this.userRepository.findById(authorId);
     if (!user) throw new NotFoundException("Utilisateur non trouvé");
 
@@ -43,9 +39,7 @@ export class PostService {
       status: data.status || "DRAFT",
       publishedAt: data.status === "PUBLISHED" ? new Date() : null,
       author: { connect: { id: authorId } },
-      category: data.categoryId
-        ? { connect: { id: data.categoryId } }
-        : undefined,
+      category: data.categoryId ? { connect: { id: data.categoryId } } : undefined,
       tags: data.tags?.length
         ? {
             create: data.tags.map((tagId) => ({
@@ -73,17 +67,11 @@ export class PostService {
     return post;
   }
 
-  async updatePost(
-    id: string,
-    userId: string,
-    data: z.infer<typeof UpdatePostSchema>,
-  ): Promise<Post> {
+  async updatePost(id: string, userId: string, data: UpdatePostDto): Promise<Post> {
     const post = await this.postRepository.findById(id);
     if (!post) throw new NotFoundException("Article non trouvé");
     if (post.authorId !== userId) {
-      throw new ForbiddenException(
-        "Vous n'êtes pas autorisé à modifier cet article",
-      );
+      throw new ForbiddenException("Vous n'êtes pas autorisé à modifier cet article");
     }
 
     if (data.categoryId) {
@@ -119,9 +107,7 @@ export class PostService {
     const post = await this.postRepository.findById(id);
     if (!post) throw new NotFoundException("Article non trouvé");
     if (post.authorId !== userId) {
-      throw new ForbiddenException(
-        "Vous n'êtes pas autorisé à supprimer cet article",
-      );
+      throw new ForbiddenException("Vous n'êtes pas autorisé à supprimer cet article");
     }
     await this.postRepository.delete(id);
   }
@@ -130,12 +116,7 @@ export class PostService {
     return this.postRepository.getFeed(userId, page, limit);
   }
 
-  async getUserPosts(
-    username: string,
-    viewerId?: string,
-    page = 1,
-    limit = 10,
-  ) {
+  async getUserPosts(username: string, viewerId?: string, page = 1, limit = 10) {
     const user = await this.userRepository.findByUsername(username);
     if (!user) throw new NotFoundException("Utilisateur non trouvé");
 

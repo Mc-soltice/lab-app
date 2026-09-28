@@ -176,7 +176,7 @@ const Hero = () => {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
               </span>
               <span className="text-sm font-medium text-amber-700">
-                Plateforme d'émancipation féminine
+                Plateforme d&apos;émancipation féminine
               </span>
             </div>
 
@@ -194,7 +194,7 @@ const Hero = () => {
             {/* Description */}
             <p className="text-lg lg:text-xl text-gray-600 max-w-xl leading-relaxed">
               La première plateforme digitale hybride camerounaise dédiée à
-              l'émancipation féminine et à l'entrepreneuriat. Inspirez-vous,
+              l&apos;émancipation féminine et à l&apos;entrepreneuriat. Inspirez-vous,
               formez-vous, et développez votre business.
             </p>
 
@@ -307,7 +307,7 @@ const Hero = () => {
                     </p>
                     <div className="flex gap-0.5 mt-1">{renderStars(5)}</div>
                     <p className="text-xs text-gray-500 mt-1">
-                      "Une expérience transformatrice !"
+                      &ldquo;Une expérience transformatrice !&rdquo;
                     </p>
                   </div>
                 </div>
@@ -385,7 +385,7 @@ const Hero = () => {
                         {renderStars(testimonial.rating)}
                       </div>
                       <p className="text-gray-700 text-base lg:text-lg leading-relaxed">
-                        "{testimonial.content}"
+                        &quot;{testimonial.content}&quot;
                       </p>
                       <div className="mt-3">
                         <p className="font-semibold text-gray-800">
