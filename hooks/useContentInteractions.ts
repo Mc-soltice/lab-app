@@ -1,13 +1,26 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  usePostDetail,
+  type CommentData,
+  type PostAuthor,
+  type PostDetailData,
+} from "@/hooks/blog/post/usePostDetail";
 
-export interface UseContentInteractionsOptions<TPost, TComment> {
+export interface UseContentInteractionsOptions<TAdaptedPost, TAdaptedComment> {
   slug: string;
-  detailHook: any;
+  detailHook: typeof usePostDetail;
   onNavigateToLogin?: () => void;
-  buildAdaptedPost?: (post: TPost, author: any, likesCount: number) => any;
-  buildAdaptedComments?: (comments: TComment[], postId?: string) => any[];
+  buildAdaptedPost?: (
+    post: PostDetailData,
+    author: PostAuthor | null,
+    likesCount: number,
+  ) => TAdaptedPost;
+  buildAdaptedComments?: (
+    comments: CommentData[],
+    postId?: string,
+  ) => TAdaptedComment[];
 }
 
 export function useContentInteractions<TPost, TComment>({
@@ -47,7 +60,7 @@ export function useContentInteractions<TPost, TComment>({
   });
 
   // Adaptations de données - calcul direct sans useMemo (pas coûteux)
-  const adaptedPost = buildAdaptedPost
+  const adaptedPost = buildAdaptedPost && post
     ? buildAdaptedPost(post, author, likesCount)
     : null;
 

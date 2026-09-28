@@ -9,7 +9,6 @@ import {
   Menu,
   Search,
   Settings,
-  User,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -115,7 +114,10 @@ function ProfileDropdown({
   isOpen: boolean;
   onToggle: () => void;
   onClose: () => void;
-  user: any;
+  user?: {
+    image?: string | null;
+    email?: string | null;
+  } | null;
   displayName: string;
   initials: string;
   logout: () => void;

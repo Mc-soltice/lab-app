@@ -1,9 +1,8 @@
 import { Emission } from "@/prisma/generated/client";
+import type { CreateEmissionDto } from "@/types/emission";
 import slugify from "slugify";
-import { z } from "zod";
 import { ConflictException } from "../exceptions";
 import { EmissionRepository } from "../repositories/emission.repository";
-import { CreateEmissionSchema } from "../validation/schemas";
 
 export class EmissionService {
   private emissionRepository = new EmissionRepository();
@@ -12,7 +11,7 @@ export class EmissionService {
     return this.emissionRepository.findAll();
   }
 
-  async createEmission(data: z.infer<typeof CreateEmissionSchema>): Promise<Emission> {
+  async createEmission(data: CreateEmissionDto): Promise<Emission> {
     const slug = slugify(data.title, { lower: true, strict: true });
     const existing = await this.emissionRepository.findBySlug(slug);
     if (existing) throw new ConflictException("Cette émission existe déjà");

@@ -200,7 +200,7 @@ const BlogLABSection = () => {
             <span className="text-sm font-medium text-amber-700">Blog LAB</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
-            L'Inspiration au Quotidien
+            L&apos;Inspiration au Quotidien
           </h2>
           <p className="text-lg lg:text-xl text-gray-600">
             Des articles qui nourrissent votre esprit, éclairent votre chemin et

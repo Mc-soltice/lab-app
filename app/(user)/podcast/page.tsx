@@ -2,8 +2,8 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import PodcastCard from "@/components/blog/podcast/PodcastCard";
 import FilterHeader, { FilterToggleGroup } from "@/components/ui/FilterHeader";
-import PodcastCard from "@/components/ui/PodcastCard";
 import { useAuthContext } from "@/contexts/auth/auth.context";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { AnimatePresence, motion } from "framer-motion";
@@ -47,8 +47,8 @@ interface Category {
 }
 
 export default function PodcastsPage() {
-  const router = useRouter();
   const { user } = useAuthContext();
+  const router = useRouter();
 
   // États
   const [categories, setCategories] = useState<Category[]>([]);
@@ -106,12 +106,12 @@ export default function PodcastsPage() {
   useEffect(() => {
     fetchCategories();
     reload({ search: searchTerm, categories: selectedCategories }, 1);
-  }, []);
+  }, [fetchCategories, reload, searchTerm, selectedCategories]);
 
   // Recharger quand la recherche ou les catégories changent
   useEffect(() => {
     reload({ search: searchTerm, categories: selectedCategories }, 1);
-  }, [searchTerm, selectedCategories]);
+  }, [reload, searchTerm, selectedCategories]);
 
   // Gérer la lecture
   const handlePlayToggle = (podcastId: string) => {
@@ -179,7 +179,7 @@ export default function PodcastsPage() {
 
   // Skeleton loader
   const SkeletonLoader = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4 w-full">
       {[...Array(8)].map((_, i) => (
         <PodcastCard key={i} isLoading />
       ))}
@@ -291,7 +291,7 @@ export default function PodcastsPage() {
             <>
               <motion.div
                 layout
-                className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5"
+                className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4 w-full"
               >
                 <AnimatePresence mode="popLayout">
                   {filteredPodcasts.map((podcast) => (

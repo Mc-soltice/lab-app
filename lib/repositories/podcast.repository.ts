@@ -18,11 +18,8 @@ export class PodcastRepository {
   }
 
   async create(data: Prisma.PodcastCreateInput): Promise<Podcast> {
-    console.dir(data, { depth: null });
-
     try {
       const result = await this.db.podcast.create({ data });
-      console.log(result);
       return result;
     } catch (e) {
       console.error(e);

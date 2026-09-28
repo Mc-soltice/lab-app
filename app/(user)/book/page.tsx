@@ -1,9 +1,12 @@
 // app/(user)/books/page.tsx
-import BookGrid from "@/components/ui/BookGrid";
+import BookGrid from "@/components/blog/book/BookGrid";
 import BooksPageHeader from "@/components/ui/BooksPageHeader";
 import { getSession } from "@/lib/auth/session";
 import { getBooks } from "@/lib/services/book.service";
 import { Suspense } from "react";
+
+// Cette route lit l'URL côté serveur (pagination/filtres), elle doit rester dynamique.
+export const dynamic = "force-dynamic";
 
 interface BooksPageProps {
   searchParams?: Promise<{ page?: string; search?: string; category?: string }>;

@@ -1,5 +1,5 @@
 // lib/services/feed.service.ts
-import { Post, User } from "@/prisma/generated/client";
+import { Prisma } from "@/prisma/generated/client";
 import { NotFoundException } from "../exceptions";
 import { prisma } from "../prisma/client";
 import {
@@ -7,31 +7,15 @@ import {
   BookmarkWithRelations,
 } from "../repositories/bookmark.repository";
 import { LikeRepository } from "../repositories/like.repository";
-import { PostRepository } from "../repositories/post.repository";
+import {
+  FEED_POST_INCLUDE,
+  FeedPostRecord,
+  PostRepository,
+} from "../repositories/post.repository";
 import { UserRepository } from "../repositories/user.repository";
 
 export interface FeedItem {
-  post: Post & {
-    author: {
-      id: string;
-      username: string;
-      firstName: string | null;
-      lastName: string | null;
-      avatar: string | null;
-    };
-    category: {
-      id: string;
-      name: string;
-      slug: string;
-    } | null;
-    tags: Array<{
-      tag: {
-        id: string;
-        name: string;
-        slug: string;
-      };
-    }>;
-  };
+  post: FeedPostRecord;
   author: {
     id: string;
     username: string;
@@ -58,35 +42,11 @@ export interface FeedResponse {
   };
 }
 
-type AuthorWithStats = User & {
-  _count: {
-    posts: number;
-  };
-};
+type AuthorWithStats = Prisma.UserGetPayload<{
+  include: { _count: { select: { posts: true } } };
+}>;
 
-// Type pour les posts avec leurs relations
-type PostWithRelations = Post & {
-  author: {
-    id: string;
-    username: string;
-    firstName: string | null;
-    lastName: string | null;
-    avatar: string | null;
-    bio: string | null;
-  };
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  tags: Array<{
-    tag: {
-      id: string;
-      name: string;
-      slug: string;
-    };
-  }>;
-};
+type PostWithRelations = FeedPostRecord;
 
 // Alias pour les bookmarks de type "post"
 type BookmarkWithPost = BookmarkWithRelations;
@@ -125,8 +85,8 @@ export class FeedService {
     }
 
     // Préparer les IDs des posts et auteurs pour les requêtes parallèles
-    const authorIds = [...new Set(posts.map((post: Post) => post.authorId))];
-    const postIds = posts.map((post: Post) => post.id);
+    const authorIds = [...new Set(posts.map((post) => post.authorId))];
+    const postIds = posts.map((post) => post.id);
 
     // Récupérer les informations enrichies des auteurs
     const authors = await this.getAuthorsWithStats(authorIds);
@@ -143,16 +103,18 @@ export class FeedService {
       ]);
 
       userLikes = new Set(
-        likes.map((like) => like.postId!).filter(Boolean) as string[],
+        likes
+          .map((like) => like.postId)
+          .filter((postId): postId is string => postId !== null),
       );
       userBookmarks = new Set(
         bookmarks
-          .map((bookmark) => bookmark.postId!)
-          .filter(Boolean) as string[],
+          .map((bookmark) => bookmark.postId)
+          .filter((postId): postId is string => postId !== null),
       );
     }
 
-    const feedItems: FeedItem[] = posts.map((post: any) => {
+    const feedItems: FeedItem[] = posts.map((post) => {
       const author = authors.find(
         (a: AuthorWithStats) => a.id === post.authorId,
       );
@@ -229,7 +191,7 @@ export class FeedService {
     };
 
     // Préparer les IDs des posts et les interactions
-    const postIds = posts.map((post: any) => post.id);
+    const postIds = posts.map((post) => post.id);
     let userLikes: Set<string> = new Set();
     let userBookmarks: Set<string> = new Set();
 
@@ -241,16 +203,18 @@ export class FeedService {
       ]);
 
       userLikes = new Set(
-        likes.map((like) => like.postId!).filter(Boolean) as string[],
+        likes
+          .map((like) => like.postId)
+          .filter((postId): postId is string => postId !== null),
       );
       userBookmarks = new Set(
         bookmarks
-          .map((bookmark) => bookmark.postId!)
-          .filter(Boolean) as string[],
+          .map((bookmark) => bookmark.postId)
+          .filter((postId): postId is string => postId !== null),
       );
     }
 
-    const feedItems: FeedItem[] = posts.map((post: any) => ({
+    const feedItems: FeedItem[] = posts.map((post) => ({
       post,
       author,
       ...(userId && {
@@ -294,22 +258,7 @@ export class FeedService {
           { likesCount: "desc" },
           { commentsCount: "desc" },
         ],
-        include: {
-          author: {
-            select: {
-              id: true,
-              username: true,
-              firstName: true,
-              lastName: true,
-              avatar: true,
-              bio: true,
-            },
-          },
-          category: { select: { id: true, name: true, slug: true } },
-          tags: {
-            include: { tag: { select: { id: true, name: true, slug: true } } },
-          },
-        },
+        include: FEED_POST_INCLUDE,
       }),
       prisma.post.count({
         where: { status: "PUBLISHED" },
@@ -317,11 +266,11 @@ export class FeedService {
     ]);
 
     // Récupérer les statistiques des auteurs
-    const authorIds = [...new Set(posts.map((post: any) => post.authorId))];
+    const authorIds = [...new Set(posts.map((post) => post.authorId))];
     const authorsWithStats = await this.getAuthorsWithStats(authorIds);
 
     // Préparer les interactions
-    const postIds = posts.map((post: any) => post.id);
+    const postIds = posts.map((post) => post.id);
     let userLikes: Set<string> = new Set();
     let userBookmarks: Set<string> = new Set();
 
@@ -333,16 +282,18 @@ export class FeedService {
       ]);
 
       userLikes = new Set(
-        likes.map((like) => like.postId!).filter(Boolean) as string[],
+        likes
+          .map((like) => like.postId)
+          .filter((postId): postId is string => postId !== null),
       );
       userBookmarks = new Set(
         bookmarks
-          .map((bookmark) => bookmark.postId!)
-          .filter(Boolean) as string[],
+          .map((bookmark) => bookmark.postId)
+          .filter((postId): postId is string => postId !== null),
       );
     }
 
-    const feedItems: FeedItem[] = posts.map((post: any) => {
+    const feedItems: FeedItem[] = posts.map((post) => {
       const authorWithStats = authorsWithStats.find(
         (a: AuthorWithStats) => a.id === post.authorId,
       );
@@ -440,30 +391,15 @@ export class FeedService {
         id: { in: postIds },
         status: "PUBLISHED",
       },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            avatar: true,
-            bio: true,
-          },
-        },
-        category: { select: { id: true, name: true, slug: true } },
-        tags: {
-          include: { tag: { select: { id: true, name: true, slug: true } } },
-        },
-      },
+      include: FEED_POST_INCLUDE,
     });
 
     // Conserver l'ordre des bookmarks (les plus récents d'abord)
-    const orderedPosts = postIds
+    const orderedPosts: PostWithRelations[] = postIds
       .map((id) => posts.find((post) => post.id === id))
       .filter(
         (post): post is (typeof posts)[number] => post !== undefined,
-      ) as PostWithRelations[];
+      );
 
     // Récupérer les statistiques des auteurs et interactions EN PARALLÈLE
     const authorIds = [...new Set(orderedPosts.map((post) => post.authorId))];
@@ -480,7 +416,7 @@ export class FeedService {
       const bookmark = postBookmarks.find((b) => b.postId === post.id);
 
       return {
-        post: post as any,
+        post,
         author: {
           id: post.author.id,
           username: post.author.username,
@@ -562,7 +498,7 @@ export class FeedService {
     };
 
     // Préparer les IDs des posts pour les interactions
-    const postIds: string[] = posts.map((post: any) => post.id);
+    const postIds = posts.map((post) => post.id);
     let userLikes: Set<string> = new Set();
     let userBookmarks: Set<string> = new Set();
 
@@ -574,16 +510,18 @@ export class FeedService {
       ]);
 
       userLikes = new Set(
-        likes.map((like) => like.postId!).filter(Boolean) as string[],
+        likes
+          .map((like) => like.postId)
+          .filter((postId): postId is string => postId !== null),
       );
       userBookmarks = new Set(
         bookmarks
-          .map((bookmark) => bookmark.postId!)
-          .filter(Boolean) as string[],
+          .map((bookmark) => bookmark.postId)
+          .filter((postId): postId is string => postId !== null),
       );
     }
 
-    const feedItems: FeedItem[] = posts.map((post: any) => ({
+    const feedItems: FeedItem[] = posts.map((post) => ({
       post,
       author,
       ...(currentUserId && {
@@ -642,7 +580,7 @@ export class FeedService {
       throw new NotFoundException(`Auteur ${userId} non trouvé`);
     }
 
-    return author as AuthorWithStats;
+    return author;
   }
 
   private async getAuthorsWithStats(
@@ -661,6 +599,6 @@ export class FeedService {
           },
         },
       },
-    }) as Promise<AuthorWithStats[]>;
+    });
   }
 }

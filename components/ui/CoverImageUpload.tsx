@@ -2,6 +2,7 @@
 "use client";
 
 import ProductImage from "@/components/ProductImage";
+import { ProgressBar } from "@/components/ui/AdvancedLoadingComponent";
 import { AlertCircle, ImagePlus, Link2, Loader2, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -289,20 +290,15 @@ export default function CoverImageUpload({
                 <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
                   Upload en cours... {uploadProgress}%
                 </span>
-                {uploadProgress < 100 && (
-                  <div
-                    className="w-48 h-1 rounded-full overflow-hidden"
-                    style={{ backgroundColor: "var(--border)" }}
-                  >
-                    <div
-                      className="h-full transition-all duration-300 rounded-full"
-                      style={{
-                        width: `${uploadProgress}%`,
-                        backgroundColor: "var(--accent)",
-                      }}
-                    />
-                  </div>
-                )}
+                <div className="w-56">
+                  <ProgressBar
+                    percentage={uploadProgress}
+                    size="sm"
+                    color="orange"
+                    label="Upload de la couverture"
+                    percentageSuffix=""
+                  />
+                </div>
               </>
             ) : (
               <>

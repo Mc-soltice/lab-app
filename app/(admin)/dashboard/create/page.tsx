@@ -2,6 +2,9 @@ import CreateResourceEditor, {
   type CreateResourceType,
 } from "@/components/resource/create/CreateResourceEditor";
 
+// Cette route lit l'URL côté serveur (type de ressource), elle doit rester dynamique.
+export const dynamic = "force-dynamic";
+
 const resourceTypes: CreateResourceType[] = ["podcast", "post", "book"];
 
 export default async function CreateResourcePage({

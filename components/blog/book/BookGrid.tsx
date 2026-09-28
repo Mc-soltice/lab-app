@@ -2,7 +2,7 @@
 "use client";
 
 import type { BookWithRelations } from "@/lib/services/book.service";
-import BookCard from "@/components/ui/BookCard";
+import BookCard from "./BookCard";
 
 interface BookGridProps {
   books: BookWithRelations[];

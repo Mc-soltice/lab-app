@@ -1,11 +1,10 @@
 // lib/services/tag.service.ts
 import { Tag } from "@/prisma/generated/client";
+import type { CreateTagDto } from "@/types/tag";
 import slugify from "slugify";
-import { z } from "zod";
 import { ConflictException, NotFoundException } from "../exceptions";
 import { PostRepository } from "../repositories/post.repository";
 import { TagRepository } from "../repositories/tag.repository";
-import { CreateTagSchema } from "../validation/schemas";
 
 export class TagService {
   private tagRepository = new TagRepository();
@@ -15,7 +14,7 @@ export class TagService {
     return this.tagRepository.findAll();
   }
 
-  async createTag(data: z.infer<typeof CreateTagSchema>): Promise<Tag> {
+  async createTag(data: CreateTagDto): Promise<Tag> {
     const slug = slugify(data.name, { lower: true, strict: true });
     const existing = await this.tagRepository.findBySlug(slug);
     if (existing) throw new ConflictException("Ce tag existe déjà");

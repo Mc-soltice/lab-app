@@ -3,10 +3,7 @@ import { hash } from "bcrypt";
 import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "../../../../lib/error-handler";
 import { prisma } from "../../../../lib/prisma/client";
-import { UserService } from "../../../../lib/services/user.service";
 import { RegisterSchema } from "../../../../lib/validation/schemas";
-
-const userService = new UserService();
 
 export async function POST(req: NextRequest) {
   try {

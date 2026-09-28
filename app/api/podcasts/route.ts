@@ -1,4 +1,5 @@
 // app/api/podcasts/route.ts
+import type { CreatePodcastDto } from "@/types/podcast";
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "../../../lib/auth/session";
 import { handleError } from "../../../lib/error-handler";
@@ -48,11 +49,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
     const body = await req.json();
-    const validated = CreatePodcastSchema.parse(body);
-    const podcast = await podcastService.createPodcast(
-      session.user.id,
-      validated,
-    );
+    const validated: CreatePodcastDto = CreatePodcastSchema.parse(body);
+    const podcast = await podcastService.createPodcast(session.user.id, validated);
     return NextResponse.json(podcast, { status: 201 });
   } catch (error) {
     return handleError(error);

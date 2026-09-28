@@ -2,14 +2,14 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import FeaturedPodcastHero from "@/components/ui/FeaturedPodcastHero";
+import FeaturedPodcastHero from "@/components/blog/feed/podcast/FeaturedPodcastHero";
+import { MultimediaHub } from "@/components/blog/feed/podcast/MultimediaHub";
+import PodcastCard from "@/components/blog/podcast/PodcastCard";
 import { FilterToggleGroup } from "@/components/ui/FilterHeader";
-import PodcastCard from "@/components/ui/PodcastCard";
 import { useAuthContext } from "@/contexts/auth/auth.context";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { AnimatePresence, motion } from "framer-motion";
 import { Filter, Headphones, Loader2, Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface Podcast {
@@ -49,7 +49,6 @@ interface Category {
 }
 
 export default function PodcastsPage() {
-  const router = useRouter();
   const { user } = useAuthContext();
 
   // États
@@ -114,7 +113,7 @@ export default function PodcastsPage() {
   useEffect(() => {
     fetchCategories();
     reload({ search: searchTerm, categories: selectedCategories }, 1);
-  }, []);
+  }, [categories.length, fetchCategories, reload, searchTerm, selectedCategories]);
 
   // Mettre à jour les compteurs quand les podcasts changent
   useEffect(() => {
@@ -131,7 +130,7 @@ export default function PodcastsPage() {
   // Recharger quand la recherche ou les catégories changent
   useEffect(() => {
     reload({ search: searchTerm, categories: selectedCategories }, 1);
-  }, [searchTerm, selectedCategories]);
+  }, [reload, searchTerm, selectedCategories]);
 
   // Gérer la lecture
   const handlePlayToggle = (podcastId: string) => {
@@ -180,9 +179,25 @@ export default function PodcastsPage() {
     icon: cat.count && cat.count > 0 ? "🎙️" : undefined,
   }));
 
+  const emissionPosts = podcasts.map((podcast) => ({
+    id: podcast.id,
+    title: podcast.title,
+    excerpt: podcast.description || "",
+    type: "podcast" as const,
+    status: "published" as const,
+    authorName:
+      [podcast.author.firstName, podcast.author.lastName].filter(Boolean).join(" ") ||
+      podcast.author.username,
+    authorRole: "Animateur",
+    imageUrl: podcast.coverImage || undefined,
+    audio_url: podcast.audioUrl,
+    mediaType: podcast.mediaType || "AUDIO",
+    category: podcast.category?.name || "Podcast",
+  }));
+
   // Skeleton loader
   const SkeletonLoader = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4 w-full">
       {[...Array(8)].map((_, i) => (
         <PodcastCard key={i} isLoading />
       ))}
@@ -205,6 +220,19 @@ export default function PodcastsPage() {
               onPlayToggle={handlePlayToggle}
             />
           )}
+
+          {emissionPosts.some((post) => Boolean(post.audio_url?.trim())) && (
+            <section className="mb-8">
+              <h2
+                className="mb-4 text-xl sm:text-2xl font-bold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Émission
+              </h2>
+              <MultimediaHub posts={emissionPosts} />
+            </section>
+          )}
+
           {/* Header avec dégradé ambre-rose */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -417,7 +445,7 @@ export default function PodcastsPage() {
             <>
               <motion.div
                 layout
-                className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5"
+                className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-4 w-full"
               >
                 <AnimatePresence mode="popLayout">
                   {filteredPodcasts.map((podcast) => (

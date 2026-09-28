@@ -7,64 +7,8 @@ import EcommerceSection from "@/components/home/sections/EcommerceSection";
 import VirtuoseProServices from "@/components/home/sections/VirtuoseProServices";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
-import { MegaMenuSection } from "@/types/Navbar";
 
 export default function Home() {
-  const sections: MegaMenuSection[] = [
-    {
-      label: "Produits",
-      columns: [
-        {
-          title: "Logiciels",
-          items: [
-            { id: "p1", label: "CRM", href: "/crm" },
-            { id: "p2", label: "ERP", href: "/erp" },
-            { id: "p3", label: "Analytics", href: "/analytics" },
-          ],
-        },
-        {
-          title: "Solutions",
-          items: [
-            { id: "p4", label: "Cloud", href: "/cloud" },
-            { id: "p5", label: "Sécurité", href: "/security" },
-          ],
-        },
-      ],
-      featured: [{ id: "f1", label: "🚀 Nouveau : IA intégrée", href: "/ai" }],
-    },
-    {
-      label: "Ressources",
-      columns: [
-        {
-          title: "Documentation",
-          items: [
-            { id: "r1", label: "Guides", href: "/guides" },
-            { id: "r2", label: "API", href: "/api" },
-          ],
-        },
-        {
-          title: "Support",
-          items: [
-            { id: "r3", label: "FAQ", href: "/faq" },
-            { id: "r4", label: "Contact", href: "/contact" },
-          ],
-        },
-      ],
-    },
-    {
-      label: "Tarifs",
-      columns: [
-        {
-          title: "Offres",
-          items: [
-            { id: "t1", label: "Gratuit", href: "/free" },
-            { id: "t2", label: "Pro", href: "/pro" },
-            { id: "t3", label: "Entreprise", href: "/enterprise" },
-          ],
-        },
-      ],
-    },
-  ];
   // Données mock
   const mockProducts = [
     {

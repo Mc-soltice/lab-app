@@ -33,14 +33,13 @@ export default function ArticleDetailPage() {
     handleCommentFormSubmit,
     handleLikePost,
     handleSavePost,
-    handleDeleteComment,
     setActiveView,
     setSelectedAuthorId,
     reload,
   } = useContentInteractions({
     slug,
     detailHook: usePostDetail,
-    buildAdaptedPost: (post: any, author: any, likesCount: number) => {
+    buildAdaptedPost: (post, author, likesCount) => {
       const authorDisplayName = author
         ? [author.firstName, author.lastName].filter(Boolean).join(" ") ||
           author.username ||
@@ -74,17 +73,30 @@ export default function ArticleDetailPage() {
         }),
         readingTime: `${Math.ceil((post.content?.length || 0) / 1000)} min`,
         likesCount,
-        tags: post.tags.map((tag: any) => tag.name).filter(Boolean),
+        tags: post.tags.map((tag) => tag.name).filter(Boolean),
       };
     },
-    buildAdaptedComments: (comments: any[], postId?: string) =>
+    buildAdaptedComments: (
+      comments: Array<{
+        id: string;
+        content: string;
+        createdAt: string | Date;
+        author: {
+          firstName?: string | null;
+          lastName?: string | null;
+          username?: string | null;
+          avatar?: string | null;
+        };
+      }>,
+      postId?: string,
+    ) =>
       comments.map((comment) => ({
         id: comment.id,
         text: comment.content,
         authorName:
           [comment.author.firstName, comment.author.lastName]
             .filter(Boolean)
-            .join(" ") || comment.author.username,
+            .join(" ") || comment.author.username || "Anonyme",
         authorAvatar:
           comment.author.avatar ||
           `https://ui-avatars.com/api/?background=6366f1&color=fff&name=${encodeURIComponent(comment.author.username?.[0] || "U")}`,
@@ -183,7 +195,7 @@ export default function ArticleDetailPage() {
                   `https://ui-avatars.com/api/?background=6366f1&color=fff&name=${user.username?.[0] || "U"}`,
                 roleLabel: user.role === "ADMIN" ? "Admin" : "Blogger",
               }
-            : null
+            : undefined
         }
         handleLikePost={handleLikePost}
         handleSavePost={handleSavePost}
@@ -191,8 +203,8 @@ export default function ArticleDetailPage() {
         handleCommentFormSubmit={handleCommentFormSubmit}
         setActiveView={setActiveView}
         setSelectedAuthorId={setSelectedAuthorId}
-        setAdminTab={(tab) => {
-          console.log("Admin tab:", tab);
+        setAdminTab={(_tab) => {
+          // no-op: admin tab selection not used in this view
         }}
       />
 

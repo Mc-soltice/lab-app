@@ -36,21 +36,27 @@ export interface UIArticlePost {
   tags?: string[];
 }
 
+export interface ActiveProfile {
+  name: string;
+  avatar?: string;
+  roleLabel?: string;
+}
+
 export interface ArticleViewProps {
   activePost: UIArticlePost;
   likedPosts: string[];
   savedPosts: string[];
   comments: UIComment[];
-  userReactions: Record<string, string[]>;
+  userReactions?: Record<string, string[]>;
   commentAuthor: string;
   setCommentAuthor: (a: string) => void;
   commentText: string;
   setCommentText: (t: string) => void;
   isSubmittingComment: boolean;
-  activeProfile?: any;
+  activeProfile?: ActiveProfile;
   handleLikePost: (postId: string) => Promise<void>;
   handleSavePost: (postId: string) => void;
-  handleToggleReaction: (postId: string, reactionId: string) => void;
+  handleToggleReaction?: (postId: string, reactionId: string) => void;
   handleCommentFormSubmit: (e: React.FormEvent) => void;
   setActiveView: (view: "feed" | "article" | "author" | "admin") => void;
   setSelectedAuthorId: (id: string | null) => void;
@@ -62,7 +68,6 @@ export default function ArticleView({
   likedPosts,
   savedPosts,
   comments,
-  userReactions,
   commentAuthor,
   setCommentAuthor,
   commentText,
@@ -71,11 +76,9 @@ export default function ArticleView({
   activeProfile,
   handleLikePost,
   handleSavePost,
-  handleToggleReaction,
   handleCommentFormSubmit,
   setActiveView,
   setSelectedAuthorId,
-  setAdminTab,
 }: ArticleViewProps) {
   return (
     <motion.div

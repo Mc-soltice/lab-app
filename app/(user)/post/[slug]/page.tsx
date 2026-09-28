@@ -11,10 +11,6 @@ export default function ArticleDetailPage() {
   const router = useRouter();
   const slug = params?.slug as string;
 
-  console.log("🚀 [ArticleDetailPage] Composant monté!");
-  console.log("[ArticleDetailPage] params:", params);
-  console.log("[ArticleDetailPage] Slug extrait:", slug, "Type:", typeof slug);
-
   const {
     post,
     comments,
@@ -90,22 +86,21 @@ export default function ArticleDetailPage() {
 
   // Gestionnaires
   const handleLikePost = useCallback(
-    async (postId: string) => {
+    async (_postId: string) => {
       await toggleLike();
     },
     [toggleLike],
   );
 
   const handleSavePost = useCallback(
-    (postId: string) => {
+    (_postId: string) => {
       void toggleBookmark();
     },
     [toggleBookmark],
   );
 
-  const handleToggleReaction = useCallback((postId: string, reactionId: string) => {
+  const handleToggleReaction = useCallback((_postId: string, _reactionId: string) => {
     // Réactions non implémentées pour l'instant
-    console.log("Reaction:", reactionId);
   }, []);
 
   const handleCommentFormSubmit = useCallback(

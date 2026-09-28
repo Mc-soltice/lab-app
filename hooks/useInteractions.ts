@@ -1,18 +1,12 @@
 // hooks/useInteractions.ts
+import type { CreateInteractionDto, LikeableType } from "@/types/interaction";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 
-export interface InteractionState {
-  isLiked: boolean;
-  isBookmarked: boolean;
-  likesCount: number;
-  bookmarksCount?: number;
-}
-
 export interface UseInteractionsOptions {
   targetId: string;
-  targetType: "post" | "podcast" | "book" | "comment";
+  targetType: LikeableType;
   authorId?: string;
   currentUserId?: string | null;
   initialLiked?: boolean;
@@ -38,10 +32,7 @@ export interface UseInteractionsReturn {
 }
 
 // Helper pour exécuter une mutation d'interaction
-async function performInteractionRequest(
-  endpoint: string,
-  body: Record<string, any>,
-) {
+async function performInteractionRequest(endpoint: string, body: CreateInteractionDto) {
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -74,9 +65,7 @@ export function useInteractions({
   const [isLiked, setIsLiked] = useState<boolean>(initialLiked);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(initialBookmarked);
   const [likesCount, setLikesCount] = useState<number>(initialLikesCount);
-  const [bookmarksCount, setBookmarksCount] = useState<number>(
-    initialBookmarksCount,
-  );
+  const [bookmarksCount, setBookmarksCount] = useState<number>(initialBookmarksCount);
 
   // États de chargement
   const [isLiking, setIsLiking] = useState<boolean>(false);
@@ -138,7 +127,17 @@ export function useInteractions({
         timeoutRef.current = null;
       }
     }, 300);
-  }, [canInteract, isLiking, isLiked, likesCount, targetId, targetType, handleAuthRedirect, onLikeToggle, handleError]);
+  }, [
+    canInteract,
+    isLiking,
+    isLiked,
+    likesCount,
+    targetId,
+    targetType,
+    handleAuthRedirect,
+    onLikeToggle,
+    handleError,
+  ]);
 
   const toggleBookmark = useCallback(async () => {
     if (!canInteract) {
@@ -167,9 +166,7 @@ export function useInteractions({
         });
 
         onBookmarkToggle?.(newIsBookmarked);
-        toast.success(
-          newIsBookmarked ? "📑 Ajouté aux favoris" : "Retiré des favoris"
-        );
+        toast.success(newIsBookmarked ? "📑 Ajouté aux favoris" : "Retiré des favoris");
       } catch (error) {
         setIsBookmarked(previousBookmarked);
         if (bookmarksCount !== undefined) {
@@ -181,7 +178,17 @@ export function useInteractions({
         timeoutRef.current = null;
       }
     }, 300);
-  }, [canInteract, isBookmarking, isBookmarked, bookmarksCount, targetId, targetType, handleAuthRedirect, onBookmarkToggle, handleError]);
+  }, [
+    canInteract,
+    isBookmarking,
+    isBookmarked,
+    bookmarksCount,
+    targetId,
+    targetType,
+    handleAuthRedirect,
+    onBookmarkToggle,
+    handleError,
+  ]);
 
   return {
     isLiked,

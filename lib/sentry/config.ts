@@ -65,10 +65,10 @@ export const SENTRY_CLIENT_CONFIG = {
   attachStacktrace: true,
 
   // BeforeSend pour filtrer les événements
-  beforeSend: (event: any) => {
+  beforeSend: (event: ErrorEvent) => {
     // Filtrer les erreurs privées
-    if (event.exception) {
-      const error = event.exception.values[0];
+    const error = event.exception?.values?.[0];
+    if (error) {
       if (
         error.value?.includes("credit card") ||
         error.value?.includes("password")
@@ -92,3 +92,4 @@ export const SENTRY_SERVER_CONFIG = {
   // Timeout pour l'envoi des événements
   maxBreadcrumbs: 100,
 };
+import type { ErrorEvent } from "@sentry/core";

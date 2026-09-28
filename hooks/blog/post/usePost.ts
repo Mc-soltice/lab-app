@@ -3,6 +3,8 @@ import { useAuthContext } from "@/contexts/auth/auth.context";
 import { useCategories } from "@/hooks/blog/post/useCategories";
 import { useTags } from "@/hooks/blog/post/useTags";
 import { useRouter } from "next/navigation";
+import type { PostReadDto } from "@/types/post";
+import { toError } from "@/lib/error-utils";
 import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -27,8 +29,8 @@ export interface PostFormErrors {
 
 interface UsePostOptions {
   initialData?: Partial<PostFormData>;
-  onSuccess?: (post: any) => void;
-  onError?: (error: any) => void;
+  onSuccess?: (post: PostReadDto) => void;
+  onError?: (error: Error) => void;
 }
 
 const initialFormData: PostFormData = {
@@ -165,7 +167,7 @@ export function usePost(options: UsePostOptions = {}) {
           );
         }
 
-        const result = await response.json();
+        const result = (await response.json()) as PostReadDto;
 
         toast.success(
           formData.published
@@ -181,13 +183,15 @@ export function usePost(options: UsePostOptions = {}) {
         }
 
         resetForm();
-      } catch (error: any) {
-        console.error("Erreur lors de la soumission:", error);
-        toast.error(error.message || "Erreur lors de la création du post");
+      } catch (error: unknown) {
+        const normalizedError = toError(
+          error,
+          "Erreur lors de la création du post",
+        );
+        console.error("Erreur lors de la soumission:", normalizedError);
+        toast.error(normalizedError.message);
 
-        if (options.onError) {
-          options.onError(error);
-        }
+        options.onError?.(normalizedError);
       } finally {
         setIsSubmitting(false);
       }

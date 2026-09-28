@@ -1,22 +1,18 @@
 // lib/services/user.service.ts
 import { User } from "@/prisma/generated/client";
+import type { CreateUserDto, UpdateUserDto } from "@/types/user";
 import { hash } from "bcrypt";
-import { z } from "zod";
 import { ConflictException, NotFoundException } from "../exceptions";
 import { UserRepository } from "../repositories/user.repository";
-import { RegisterSchema, UpdateProfileSchema } from "../validation/schemas";
 
 export class UserService {
   private userRepository = new UserRepository();
 
-  async register(data: z.infer<typeof RegisterSchema>): Promise<User> {
+  async register(data: CreateUserDto): Promise<User> {
     const existingEmail = await this.userRepository.findByEmail(data.email);
-    if (existingEmail)
-      throw new ConflictException("Cet email est déjà utilisé");
+    if (existingEmail) throw new ConflictException("Cet email est déjà utilisé");
 
-    const existingUsername = await this.userRepository.findByUsername(
-      data.username,
-    );
+    const existingUsername = await this.userRepository.findByUsername(data.username);
     if (existingUsername)
       throw new ConflictException("Ce nom d'utilisateur est déjà pris");
 
@@ -37,10 +33,7 @@ export class UserService {
     return user;
   }
 
-  async updateProfile(
-    userId: string,
-    data: z.infer<typeof UpdateProfileSchema>,
-  ): Promise<User> {
+  async updateProfile(userId: string, data: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundException("Utilisateur non trouvé");
     return this.userRepository.update(userId, data);

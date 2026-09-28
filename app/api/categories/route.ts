@@ -1,4 +1,5 @@
 // app/api/categories/route.ts
+import type { CreateCategoryDto } from "@/types/category";
 import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "../../../lib/error-handler";
 import { CategoryService } from "../../../lib/services/category.service";
@@ -20,7 +21,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const validated = CreateCategorySchema.parse(body);
+    const validated: CreateCategoryDto = CreateCategorySchema.parse(body);
     const category = await categoryService.createCategory(validated);
     return NextResponse.json(category, { status: 201 });
   } catch (error) {

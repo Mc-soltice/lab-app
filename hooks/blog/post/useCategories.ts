@@ -1,6 +1,7 @@
 // hooks/blog/useCategories.ts
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { toError } from "@/lib/error-utils";
 
 export interface Category {
   id: string;
@@ -12,7 +13,7 @@ export interface Category {
 }
 
 interface UseCategoriesOptions {
-  onError?: (error: any) => void;
+  onError?: (error: Error) => void;
 }
 
 export function useCategories(options: UseCategoriesOptions = {}) {
@@ -35,12 +36,11 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       }
       const data = await response.json();
       setCategories(data.data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const normalizedError = toError(error, "Erreur lors du chargement des catégories");
       console.error("Erreur fetchCategories:", error);
-      setError(error.message);
-      if (onError) {
-        onError(error);
-      }
+      setError(normalizedError.message);
+      onError?.(normalizedError);
       toast.error("Erreur lors du chargement des catégories");
     } finally {
       setIsLoading(false);
@@ -89,15 +89,15 @@ export function useCategories(options: UseCategoriesOptions = {}) {
         setCategories((prev) => [...prev, newCategory]);
         toast.success(`Catégorie "${trimmedName}" créée avec succès`);
         return newCategory;
-      } catch (error: any) {
-        console.error("Erreur createCategory:", error);
-        setError(error.message);
-        if (onError) {
-          onError(error);
-        }
-        toast.error(
-          error.message || "Erreur lors de la création de la catégorie",
+      } catch (error: unknown) {
+        const normalizedError = toError(
+          error,
+          "Erreur lors de la création de la catégorie",
         );
+        console.error("Erreur createCategory:", error);
+        setError(normalizedError.message);
+        onError?.(normalizedError);
+        toast.error(normalizedError.message);
         return null;
       } finally {
         setIsCreating(false);

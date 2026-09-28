@@ -10,6 +10,20 @@ const AUTHOR_SELECT = {
   avatar: true,
 } satisfies Prisma.UserSelect;
 
+const BOOK_WITH_RELATIONS_INCLUDE = {
+  author: { select: AUTHOR_SELECT },
+  category: { select: { id: true, name: true, slug: true } },
+  tags: {
+    include: {
+      tag: { select: { id: true, name: true, slug: true } },
+    },
+  },
+} satisfies Prisma.BookInclude;
+
+export type BookWithRelationsRecord = Prisma.BookGetPayload<{
+  include: typeof BOOK_WITH_RELATIONS_INCLUDE;
+}>;
+
 export class BookRepository {
   private db: PrismaClient;
 
@@ -35,33 +49,21 @@ export class BookRepository {
     });
   }
 
-  async findBySlugWithRelations(slug: string): Promise<Book | null> {
+  async findBySlugWithRelations(
+    slug: string,
+  ): Promise<BookWithRelationsRecord | null> {
     return this.db.book.findUnique({
       where: { slug },
-      include: {
-        author: { select: AUTHOR_SELECT },
-        category: { select: { id: true, name: true, slug: true } },
-        tags: {
-          include: {
-            tag: { select: { id: true, name: true, slug: true } },
-          },
-        },
-      },
+      include: BOOK_WITH_RELATIONS_INCLUDE,
     });
   }
 
-  async findByIdWithRelations(id: string): Promise<Book | null> {
+  async findByIdWithRelations(
+    id: string,
+  ): Promise<BookWithRelationsRecord | null> {
     return this.db.book.findUnique({
       where: { id },
-      include: {
-        author: { select: AUTHOR_SELECT },
-        category: { select: { id: true, name: true, slug: true } },
-        tags: {
-          include: {
-            tag: { select: { id: true, name: true, slug: true } },
-          },
-        },
-      },
+      include: BOOK_WITH_RELATIONS_INCLUDE,
     });
   }
 
@@ -85,13 +87,26 @@ export class BookRepository {
   }
 
   async getUserInteractions(bookId: string, userId: string) {
+    const [like, bookmark] = await Promise.all([
+      this.db.like.findFirst({
+        where: { bookId, userId },
+        select: { id: true },
+      }),
+      this.db.bookmark.findFirst({
+        where: { bookId, userId },
+        select: { id: true },
+      }),
+    ]);
+
     return {
-      isLiked: false,
-      isBookmarked: false,
+      isLiked: like !== null,
+      isBookmarked: bookmark !== null,
     };
   }
 
-  async findMany(args: Prisma.BookFindManyArgs): Promise<Book[]> {
+  async findMany<T extends Prisma.BookFindManyArgs>(
+    args: Prisma.SelectSubset<T, Prisma.BookFindManyArgs>,
+  ): Promise<Prisma.BookGetPayload<T>[]> {
     return this.db.book.findMany(args);
   }
 
@@ -103,7 +118,7 @@ export class BookRepository {
     authorId: string,
     page = 1,
     limit = 10,
-  ): Promise<{ data: Book[]; total: number }> {
+  ): Promise<{ data: BookWithRelationsRecord[]; total: number }> {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       this.db.book.findMany({
@@ -111,7 +126,7 @@ export class BookRepository {
         skip,
         take: limit,
         orderBy: { publishedAt: "desc" },
-        include: { author: { select: AUTHOR_SELECT } },
+        include: BOOK_WITH_RELATIONS_INCLUDE,
       }),
       this.db.book.count({ where: { authorId, status: "PUBLISHED" } }),
     ]);
@@ -122,7 +137,7 @@ export class BookRepository {
     query: string,
     page = 1,
     limit = 10,
-  ): Promise<{ data: Book[]; total: number }> {
+  ): Promise<{ data: BookWithRelationsRecord[]; total: number }> {
     const skip = (page - 1) * limit;
     const where: Prisma.BookWhereInput = {
       status: "PUBLISHED",
@@ -134,7 +149,7 @@ export class BookRepository {
         skip,
         take: limit,
         orderBy: { publishedAt: "desc" },
-        include: { author: { select: AUTHOR_SELECT } },
+        include: BOOK_WITH_RELATIONS_INCLUDE,
       }),
       this.db.book.count({ where }),
     ]);

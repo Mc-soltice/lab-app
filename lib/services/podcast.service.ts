@@ -1,7 +1,7 @@
 // lib/services/podcast.service.ts
 import { Podcast, Prisma } from "@/prisma/generated/client";
+import type { CreatePodcastDto, UpdatePodcastDto } from "@/types/podcast";
 import slugify from "slugify";
-import { z } from "zod";
 import {
   ConflictException,
   ForbiddenException,
@@ -11,7 +11,6 @@ import { CategoryRepository } from "../repositories/category.repository";
 import { EmissionRepository } from "../repositories/emission.repository";
 import { PodcastRepository } from "../repositories/podcast.repository";
 import { UserRepository } from "../repositories/user.repository";
-import { CreatePodcastSchema, UpdatePodcastSchema } from "../validation/schemas";
 
 export class PodcastService {
   private podcastRepository = new PodcastRepository();
@@ -19,10 +18,7 @@ export class PodcastService {
   private categoryRepository = new CategoryRepository();
   private emissionRepository = new EmissionRepository();
 
-  async createPodcast(
-    authorId: string,
-    data: z.infer<typeof CreatePodcastSchema>,
-  ): Promise<Podcast> {
+  async createPodcast(authorId: string, data: CreatePodcastDto): Promise<Podcast> {
     const user = await this.userRepository.findById(authorId);
     if (!user) throw new NotFoundException("Utilisateur non trouvé");
 
@@ -78,7 +74,7 @@ export class PodcastService {
   async updatePodcast(
     id: string,
     userId: string,
-    data: z.infer<typeof UpdatePodcastSchema>,
+    data: UpdatePodcastDto,
   ): Promise<Podcast> {
     const podcast = await this.podcastRepository.findById(id);
     if (!podcast) throw new NotFoundException("Podcast non trouvé");

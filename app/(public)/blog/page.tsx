@@ -1,8 +1,11 @@
-import ArticleCard from "@/components/ui/ArticleCard";
-import PostFeedClient from "@/components/ui/PostFeedClient";
+import ArticleCard from "@/components/blog/post/ArticleCard";
+import PostFeedClient from "@/components/blog/post/PostFeedClient";
 import { getSession } from "@/lib/auth/session";
 import { FeedService } from "@/lib/services/feed.service";
 import { Suspense } from "react";
+
+// Cette route lit l'URL côté serveur (pagination), elle doit rester dynamique.
+export const dynamic = "force-dynamic";
 
 interface HomePageProps {
   searchParams?: Promise<{ page?: string }>;
@@ -41,9 +44,7 @@ async function FeedContent({ page }: { page: number }) {
     console.error("Error loading feed:", error);
     return (
       <div className="text-center py-12">
-        <p className="text-red-400 text-lg">
-          Erreur lors du chargement du feed
-        </p>
+        <p className="text-red-400 text-lg">Erreur lors du chargement du feed</p>
         <p className="text-neutral-500 mt-2">Veuillez réessayer plus tard</p>
       </div>
     );
@@ -76,9 +77,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     return (
       <main className="max-w-7xl mx-auto px-2 py-4 sm:px-4 lg:px-6">
         <div className="text-center py-12">
-          <p className="text-red-400 text-lg">
-            Erreur lors du chargement de la page
-          </p>
+          <p className="text-red-400 text-lg">Erreur lors du chargement de la page</p>
           <p className="text-neutral-500 mt-2">Veuillez réessayer plus tard</p>
         </div>
       </main>
